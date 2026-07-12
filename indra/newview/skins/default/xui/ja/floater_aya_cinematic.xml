@@ -19,7 +19,12 @@
                        tool_tip="アバターのアタッチメントから出るパーティクルを描画します。"/>
             <button name="d_AttachedParticles" tool_tip="デフォルトに戻す"/>
 
-            <text name="T_GeneralReflection">反射プローブ品質</text>
+            <text name="T_GeneralReflection">反射の詳細</text>
+
+            <check_box name="cb_ReflectionProbes" label="反射プローブを描画"
+                       tool_tip="オフのとき、反射プローブプリムをシーンから非表示にします。他の表面へのプローブ反射には影響しません。"/>
+            <button name="d_ReflectionProbes" tool_tip="デフォルトに戻す"/>
+
             <text name="T_ReflectionDetail">反射プローブ品質</text>
             <button name="d_ReflectionDetail" tool_tip="デフォルトに戻す"/>
 
@@ -175,8 +180,8 @@
             <text name="T_MBMaster">モーションブラー</text>
 
             <check_box name="cb_MotionBlur" label="モーションブラーを有効化"
-                       tool_tip="AYAstorm 推奨値で ON、LL デフォルトは OFF です。"/>
-            <button name="d_MotionBlur" tool_tip="AYAstorm 推奨値 (ON) に戻す"/>
+                       tool_tip="モーションブラー用の速度バッファを生成します。"/>
+            <button name="d_MotionBlur" tool_tip="デフォルトに戻す"/>
 
             <text name="T_MBStrength">強度 (px)</text>
             <button name="d_MBStrength" tool_tip="デフォルトに戻す"/>
@@ -268,6 +273,22 @@
             <check_box name="cb_EnableFullbright" label="フルブライト テクスチャを有効化 (全モード)"
                        tool_tip="OFF にするとフルブライト テクスチャが通常の陰影付き面として描画されます (全モードに適用)。"/>
             <button name="d_EnableFullbright" tool_tip="デフォルトに戻す"/>
+
+            <check_box name="cb_ForceFullbright" label="フルブライトを全体に強制 (上書き)"
+                       tool_tip="ON (かつフルブライト有効) のとき、作成者設定に関係なくすべての面をフルブライトで描画します。"/>
+            <button name="d_ForceFullbright" tool_tip="デフォルトに戻す"/>
+
+            <check_box name="cb_EnablePBRMaterials" label="PBR マテリアルを有効化 (全モード)"
+                       tool_tip="OFF にすると PBR Metallic Roughness マテリアルが抑制され、Textures (Blinn-Phong) にフォールバックします。"/>
+            <button name="d_EnablePBRMaterials" tool_tip="デフォルトに戻す"/>
+
+            <check_box name="cb_EnableNormalTextures" label="法線テクスチャを有効化 (全モード)"
+                       tool_tip="OFF にするとバンプ (凹凸) テクスチャをグローバルに抑制します。"/>
+            <button name="d_EnableNormalTextures" tool_tip="デフォルトに戻す"/>
+
+            <check_box name="cb_EnableSpecularTextures" label="スペキュラ テクスチャを有効化 (全モード)"
+                       tool_tip="OFF にすると光沢 (スペキュラ) テクスチャをグローバルに抑制します。"/>
+            <button name="d_EnableSpecularTextures" tool_tip="デフォルトに戻す"/>
 
             <check_box name="cb_DeferredLights" label="ワールド内のポイント/スポットライトを描画"
                        tool_tip="OFF にするとアタッチでない (in-world の) ポイント/スポットライトが抑制されます。"/>
