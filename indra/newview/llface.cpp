@@ -597,7 +597,7 @@ void LLFace::renderSelected(LLViewerTexture *imagep, const LLColor4& color)
             // on faces with GLTF textures we use a spectal vertex buffer with other transforms
             if (const LLTextureEntry* te = getTextureEntry())
             {
-                if (te->getGLTFRenderMaterial())
+                if (LLVOVolume::getTEPBRMaterialEffective(te))
                 {
                     vertex_buffer = mVertexBufferGLTF.get();
                 }
@@ -1056,7 +1056,7 @@ bool LLFace::calcAlignedPlanarTE(const LLFace* align_to,  LLVector2* res_st_offs
         map_offsT = orig_tep->mOffsetT;
         break;
     case LLRender::NORMAL_MAP:
-        if (mat->getNormalID().isNull())
+        if (!LLVOVolume::teHasMaterialNormalEffective(orig_tep))
         {
             return false;
         }
@@ -1067,7 +1067,7 @@ bool LLFace::calcAlignedPlanarTE(const LLFace* align_to,  LLVector2* res_st_offs
         map_offsT = mat->getNormalOffsetY();
         break;
     case LLRender::SPECULAR_MAP:
-        if (mat->getSpecularID().isNull())
+        if (!LLVOVolume::teHasMaterialSpecularEffective(orig_tep))
         {
             return false;
         }
@@ -1131,7 +1131,7 @@ bool LLFace::canRenderAsMask()
         return false;
     }
 
-    if (te->getGLTFRenderMaterial())
+    if (LLVOVolume::getTEPBRMaterialEffective(te))
     {
         return false;
     }
@@ -1273,7 +1273,7 @@ bool LLFace::getGeometryVolume(const LLVolume& volume,
     if (!tep)
         return false;
 
-    LLGLTFMaterial* gltf_mat = tep->getGLTFRenderMaterial();
+    LLGLTFMaterial* gltf_mat = LLVOVolume::getTEPBRMaterialEffective(tep);
     // To display selection markers (white squares with the rounded cross at the center)
     // on faces with GLTF textures we use a special vertex buffer with other transforms
     if (gltf_mat && !rebuild_for_gltf && tep->isSelected() && mVertexBuffer.notNull())
@@ -1355,7 +1355,7 @@ bool LLFace::getGeometryVolume(const LLVolume& volume,
     bool rebuild_tangent = rebuild_pos && mVertexBuffer->hasDataType(LLVertexBuffer::TYPE_TANGENT);
     bool rebuild_weights = rebuild_pos && mVertexBuffer->hasDataType(LLVertexBuffer::TYPE_WEIGHT4);
 
-    const U8 bump_code = tep ? tep->getBumpmap() : 0;
+    const U8 bump_code = tep ? LLVOVolume::getTEBumpmapEffective(tep) : 0;
 
     bool is_static = mDrawablep->isStatic();
     bool is_global = is_static;
@@ -1376,23 +1376,28 @@ bool LLFace::getGeometryVolume(const LLVolume& volume,
     {
         color = tep->getColor();
 
-        if (tep->getGLTFRenderMaterial())
+        if (gltf_mat)
         {
-            color = tep->getGLTFRenderMaterial()->mBaseColor;
+            color = gltf_mat->mBaseColor;
+        }
+        else if (LLGLTFMaterial* raw_gltf_mat = tep->getGLTFRenderMaterial())
+        {
+            // PBR suppressed — preserve albedo tint for Blinn-Phong fallback
+            color = raw_gltf_mat->mBaseColor;
         }
     }
 
     if (rebuild_color)
     { //decide if shiny goes in alpha channel of color
         if (tep &&
-            !isInAlphaPool() && tep->getGLTFRenderMaterial() == nullptr)  // <--- alpha channel MUST contain transparency, not shiny
+            !isInAlphaPool() && LLVOVolume::getTEPBRMaterialEffective(tep) == nullptr)  // <--- alpha channel MUST contain transparency, not shiny
     {
             LLMaterial* mat = tep->getMaterialParams().get();
 
             bool shiny_in_alpha = false;
 
             //store shiny in alpha if we don't have a specular map
-            if  (!mat || mat->getSpecularID().isNull())
+            if (!LLVOVolume::teHasMaterialSpecularEffective(tep))
             {
                 shiny_in_alpha = true;
             }
@@ -1407,8 +1412,9 @@ bool LLFace::getGeometryVolume(const LLVolume& volume,
                     0.75f
                 };
 
-                llassert(tep->getShiny() <= 3);
-                color.mV[3] = U8 (SHININESS_TO_ALPHA[tep->getShiny()] * 255);
+                const U8 shiny = tep ? LLVOVolume::getTEShinyEffective(tep) : 0;
+                llassert(shiny <= 3);
+                color.mV[3] = U8 (SHININESS_TO_ALPHA[shiny] * 255);
             }
         }
     }
@@ -1681,8 +1687,10 @@ bool LLFace::getGeometryVolume(const LLVolume& volume,
 
             if ((mat || gltf_mat) && !do_bump)
             {
-                do_bump  = mVertexBuffer->hasDataType(LLVertexBuffer::TYPE_TEXCOORD1)
-                         || mVertexBuffer->hasDataType(LLVertexBuffer::TYPE_TEXCOORD2);
+                do_bump  = LLVOVolume::teHasNormalMappingEffective(tep)
+                        && mVertexBuffer->hasDataType(LLVertexBuffer::TYPE_TEXCOORD1);
+                do_bump |= LLVOVolume::teHasSpecularMappingEffective(tep)
+                        && mVertexBuffer->hasDataType(LLVertexBuffer::TYPE_TEXCOORD2);
             }
 
             // For GLTF materials: Transforms will be applied later
@@ -1821,7 +1829,7 @@ bool LLFace::getGeometryVolume(const LLVolume& volume,
 
                 LLStrider<LLVector2> bump_tc;
 
-                if (mat && !mat->getNormalID().isNull())
+                if (mat && LLVOVolume::teHasMaterialNormalEffective(tep))
                 { //writing out normal and specular texture coordinates, not bump offsets
                     do_bump = false;
                 }
