@@ -218,22 +218,11 @@ void FSDiscordConnect::updateRichPresence() const
 
     discordPresence.startTimestamp = mConnectTime;
 
-#ifdef OPENSIM
-    if (LLGridManager::getInstance()->isInSecondLife())
-    {
-        discordPresence.largeImageKey = "secondlife_512";
-    }
-    else
-    {
-        discordPresence.largeImageKey = "opensimulator_512";
-    }
-#else
-    discordPresence.largeImageKey = "secondlife_512";
-#endif
+    discordPresence.largeImageKey = "sl-logo";
 
     auto gridLabel = LLGridManager::getInstance()->getGridLabel();
     discordPresence.largeImageText = gridLabel.c_str();
-    discordPresence.smallImageKey = "firestorm_512";
+    discordPresence.smallImageKey = "firestorm-logo";
     std::string appName = std::string("via " + APP_NAME);
     discordPresence.smallImageText = appName.c_str();
 
