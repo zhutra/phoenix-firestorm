@@ -64,12 +64,15 @@
 
             <text       follows="left|top" layout="topleft" name="T_GeneralReflection"   top="116" left="8"   width="472" height="18" font="SansSerif">Reflection detail</text>
 
-            <text       follows="left|top" layout="topleft" name="T_ReflectionDetail"    top="140" left="12"  width="160" height="20">Reflection probe quality</text>
-            <slider_bar follows="left|top" layout="topleft" name="sb_ReflectionDetail"   top="142" left="176" width="195" height="16" control_name="RenderReflectionProbeLevel" min_val="0" max_val="3" increment="1"/>
-            <spinner    follows="left|top" layout="topleft" name="s_ReflectionDetail"    top="140" left="376" width="65"  height="20" control_name="RenderReflectionProbeLevel" min_val="0" max_val="3" increment="1" decimal_digits="0" label_width="0"/>
-            <button     follows="left|top" layout="topleft" name="d_ReflectionDetail"    top="140" left="445" width="20"  height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderReflectionProbeLevel"/></button>
+            <check_box follows="left|top" layout="topleft" name="cb_ReflectionProbes"   control_name="RenderReflectionProbes"   top="140" left="36" width="406" height="20" label="Render reflection probes" tool_tip="If off, reflection probe prims are hidden from the scene. Does not affect probe-based reflections on other surfaces."/>
+            <button    follows="left|top" layout="topleft" name="d_ReflectionProbes"    top="140" left="12" width="20"  height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderReflectionProbes"/></button>
 
-            <text       follows="left|top|right" layout="topleft" name="T_GeneralNote"   top="186" left="8"   width="472" height="40" font="SansSerifSmall" word_wrap="true" text_color="White_50">
+            <text       follows="left|top" layout="topleft" name="T_ReflectionDetail"    top="164" left="12"  width="160" height="20">Reflection probe quality</text>
+            <slider_bar follows="left|top" layout="topleft" name="sb_ReflectionDetail"   top="166" left="176" width="195" height="16" control_name="RenderReflectionProbeLevel" min_val="0" max_val="3" increment="1"/>
+            <spinner    follows="left|top" layout="topleft" name="s_ReflectionDetail"    top="164" left="376" width="65"  height="20" control_name="RenderReflectionProbeLevel" min_val="0" max_val="3" increment="1" decimal_digits="0" label_width="0"/>
+            <button     follows="left|top" layout="topleft" name="d_ReflectionDetail"    top="164" left="445" width="20"  height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderReflectionProbeLevel"/></button>
+
+            <text       follows="left|top|right" layout="topleft" name="T_GeneralNote"   top="210" left="8"   width="472" height="40" font="SansSerifSmall" word_wrap="true" text_color="White_50">
                 Tip: change View Mode in Preferences → Graphics. Restart the viewer after switching to apply.
             </text>
         </panel>
@@ -237,8 +240,8 @@
         <panel border="false" follows="left|top" label="Motion Blur" layout="topleft" left="1" name="tab_motion_blur" top="0" height="427" width="488">
             <text follows="left|top" layout="topleft" name="T_MBMaster" top="8" left="8" width="472" height="18" font="SansSerif">Motion Blur</text>
 
-            <check_box follows="left|top" layout="topleft" name="cb_MotionBlur" control_name="RenderMotionBlur" top="32" left="36" width="406" height="20" label="Enable Motion Blur" tool_tip="AYAstorm preset default ON; LL default OFF."/>
-            <button    follows="left|top" layout="topleft" name="d_MotionBlur"  top="32" left="12" width="20"  height="20" label="D" tool_tip="Reset to AYAstorm preset (ON)"><button.commit_callback function="AYAResetCinematic" parameter="RenderMotionBlur"/></button>
+            <check_box follows="left|top" layout="topleft" name="cb_MotionBlur" control_name="RenderMotionBlur" top="32" left="36" width="406" height="20" label="Enable Motion Blur" tool_tip="Generate a velocity buffer for the motion blur post effect."/>
+            <button    follows="left|top" layout="topleft" name="d_MotionBlur"  top="32" left="12" width="20"  height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderMotionBlur"/></button>
 
             <text       follows="left|top" layout="topleft" name="T_MBStrength" top="60" left="12" width="160" height="20">Strength (px)</text>
             <slider_bar follows="left|top" layout="topleft" name="sb_MBStrength" top="62" left="176" width="195" height="16" control_name="RenderMotionBlurStrength" min_val="0" max_val="128" increment="1"/>
@@ -318,7 +321,7 @@
 
             <text follows="left|top" layout="topleft" name="T_R15Godrays" top="340" left="8" width="472" height="18" font="SansSerif">Godrays (sun-facing beam)</text>
 
-            <check_box follows="left|top" layout="topleft" name="cb_R15GodraysCinematic" control_name="AYAR15GodraysInCinematicEnabled" top="362" left="36" width="406" height="20" label="Enable Godrays" tool_tip="Cinematic モードで Godrays を有効化 (AYAstorm View では常時 ON)。"/>
+            <check_box follows="left|top" layout="topleft" name="cb_R15GodraysCinematic" control_name="AYAR15GodraysInCinematicEnabled" top="362" left="36" width="406" height="20" label="Enable Godrays" tool_tip="Enable sun-facing godray beams in Cinematic mode. Always on when using AYAstorm View."/>
             <button    follows="left|top" layout="topleft" name="d_R15GodraysCinematic"  top="362" left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="AYAR15GodraysInCinematicEnabled"/></button>
 
             <text       follows="left|top" layout="topleft" name="T_R15PhaseExp"  top="386" left="12"  width="160" height="20">Beam tightness</text>
@@ -340,19 +343,31 @@
             <check_box follows="left|top" layout="topleft" name="cb_EnableFullbright"   enabled_control="AYACinematicModeActive" control_name="RenderEnableFullbright"   top="32"  left="36" width="406" height="20" label="Enable fullbright textures (global)" tool_tip="If off, fullbright textures render as regular shaded surfaces (applies to all modes)."/>
             <button    follows="left|top" layout="topleft" name="d_EnableFullbright"    top="32"  left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderEnableFullbright"/></button>
 
-            <check_box follows="left|top" layout="topleft" name="cb_DeferredLights"     enabled_control="AYACinematicModeActive" control_name="RenderDeferredLights"     top="56"  left="36" width="406" height="20" label="Render in-world point/spot lights" tool_tip="If off, non-attached point/spot lights are suppressed."/>
-            <button    follows="left|top" layout="topleft" name="d_DeferredLights"      top="56"  left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderDeferredLights"/></button>
+            <check_box follows="left|top" layout="topleft" name="cb_ForceFullbright"    enabled_control="RenderForceFullbrightActive" control_name="RenderForceFullbright"    top="56"  left="36" width="406" height="20" label="Force fullbright everywhere (override)" tool_tip="If on (and fullbright is enabled), all surfaces render as fullbright regardless of creator settings."/>
+            <button    follows="left|top" layout="topleft" name="d_ForceFullbright"     top="56"  left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderForceFullbright"/></button>
 
-            <check_box follows="left|top" layout="topleft" name="cb_OwnAttachedLights"  enabled_control="AYACinematicModeActive" control_name="RenderOwnAttachedLights"  top="80"  left="36" width="406" height="20" label="Render own attached lights" tool_tip="If off, lights attached to your own avatar are suppressed."/>
-            <button    follows="left|top" layout="topleft" name="d_OwnAttachedLights"   top="80"  left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderOwnAttachedLights"/></button>
+            <check_box follows="left|top" layout="topleft" name="cb_EnablePBRMaterials" enabled_control="AYACinematicModeActive" control_name="RenderEnablePBRMaterials" top="80"  left="36" width="406" height="20" label="Enable PBR materials (global)" tool_tip="If off, PBR Metallic Roughness materials are suppressed and surfaces fall back to Textures (Blinn-Phong)."/>
+            <button    follows="left|top" layout="topleft" name="d_EnablePBRMaterials"  top="80"  left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderEnablePBRMaterials"/></button>
 
-            <check_box follows="left|top" layout="topleft" name="cb_OtherAttachedLights" enabled_control="AYACinematicModeActive" control_name="RenderOtherAttachedLights" top="104" left="36" width="406" height="20" label="Render others' attached lights" tool_tip="If off, lights attached to other avatars are suppressed."/>
-            <button    follows="left|top" layout="topleft" name="d_OtherAttachedLights" top="104" left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderOtherAttachedLights"/></button>
+            <check_box follows="left|top" layout="topleft" name="cb_EnableNormalTextures"   enabled_control="AYACinematicModeActive" control_name="RenderEnableNormalTextures"   top="104" left="36" width="406" height="20" label="Enable normal textures (global)" tool_tip="If off, bumpiness (normal/bump map) textures are suppressed globally."/>
+            <button    follows="left|top" layout="topleft" name="d_EnableNormalTextures"    top="104" left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderEnableNormalTextures"/></button>
 
-            <text       follows="left|top" layout="topleft" name="T_GlobalLightStrength" top="128" left="12" width="160" height="20">Global light strength</text>
-            <slider_bar follows="left|top" layout="topleft" name="sb_GlobalLightStrength" top="130" left="176" width="195" height="16" enabled_control="AYACinematicModeActive" control_name="RenderGlobalLightStrength" min_val="0" max_val="4" increment="0.05"/>
-            <spinner    follows="left|top" layout="topleft" name="s_GlobalLightStrength"  top="128" left="376" width="65"  height="20" enabled_control="AYACinematicModeActive" control_name="RenderGlobalLightStrength" min_val="0" max_val="4" increment="0.05" decimal_digits="2" label_width="0"/>
-            <button     follows="left|top" layout="topleft" name="d_GlobalLightStrength"  top="128" left="445" width="20"  height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderGlobalLightStrength"/></button>
+            <check_box follows="left|top" layout="topleft" name="cb_EnableSpecularTextures" enabled_control="AYACinematicModeActive" control_name="RenderEnableSpecularTextures" top="128" left="36" width="406" height="20" label="Enable specular textures (global)" tool_tip="If off, shininess (specular) textures are suppressed globally."/>
+            <button    follows="left|top" layout="topleft" name="d_EnableSpecularTextures"  top="128" left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderEnableSpecularTextures"/></button>
+
+            <check_box follows="left|top" layout="topleft" name="cb_DeferredLights"     enabled_control="AYACinematicModeActive" control_name="RenderDeferredLights"     top="152" left="36" width="406" height="20" label="Render in-world point/spot lights" tool_tip="If off, non-attached point/spot lights are suppressed."/>
+            <button    follows="left|top" layout="topleft" name="d_DeferredLights"      top="152" left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderDeferredLights"/></button>
+
+            <check_box follows="left|top" layout="topleft" name="cb_OwnAttachedLights"  enabled_control="AYACinematicModeActive" control_name="RenderOwnAttachedLights"  top="176" left="36" width="406" height="20" label="Render own attached lights" tool_tip="If off, lights attached to your own avatar are suppressed."/>
+            <button    follows="left|top" layout="topleft" name="d_OwnAttachedLights"   top="176" left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderOwnAttachedLights"/></button>
+
+            <check_box follows="left|top" layout="topleft" name="cb_OtherAttachedLights" enabled_control="AYACinematicModeActive" control_name="RenderOtherAttachedLights" top="200" left="36" width="406" height="20" label="Render others' attached lights" tool_tip="If off, lights attached to other avatars are suppressed."/>
+            <button    follows="left|top" layout="topleft" name="d_OtherAttachedLights" top="200" left="12" width="20" height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderOtherAttachedLights"/></button>
+
+            <text       follows="left|top" layout="topleft" name="T_GlobalLightStrength" top="224" left="12" width="160" height="20">Global light strength</text>
+            <slider_bar follows="left|top" layout="topleft" name="sb_GlobalLightStrength" top="226" left="176" width="195" height="16" enabled_control="AYACinematicModeActive" control_name="RenderGlobalLightStrength" min_val="0" max_val="4" increment="0.05"/>
+            <spinner    follows="left|top" layout="topleft" name="s_GlobalLightStrength"  top="224" left="376" width="65"  height="20" enabled_control="AYACinematicModeActive" control_name="RenderGlobalLightStrength" min_val="0" max_val="4" increment="0.05" decimal_digits="2" label_width="0"/>
+            <button     follows="left|top" layout="topleft" name="d_GlobalLightStrength"  top="224" left="445" width="20"  height="20" label="D" tool_tip="Reset to default"><button.commit_callback function="AYAResetCinematic" parameter="RenderGlobalLightStrength"/></button>
         </panel>
 
         <!-- =================== Tab 9: Post-process =================== -->
