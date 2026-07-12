@@ -127,13 +127,123 @@ static bool enableVolumeSAPProtection()
 
 static bool renderFullbrightEnabled()
 {
-    static LLCachedControl<bool> render_fullbright(gSavedSettings, "RenderEnableFullbright", true);
-    return render_fullbright;
+    return LLVOVolume::renderFullbrightGloballyEnabled();
 }
 
 static bool teFullbrightEnabled(const LLTextureEntry* te)
 {
-    return te && renderFullbrightEnabled() && te->getFullbright();
+    return LLVOVolume::isTEFullbrightEffective(te);
+}
+
+bool LLVOVolume::renderFullbrightGloballyEnabled()
+{
+    static LLCachedControl<bool> render_fullbright(gSavedSettings, "RenderEnableFullbright", true);
+    return render_fullbright;
+}
+
+bool LLVOVolume::renderForceFullbrightOverride()
+{
+    static LLCachedControl<bool> render_force_fullbright(gSavedSettings, "RenderForceFullbright", true);
+    return renderFullbrightGloballyEnabled() && render_force_fullbright;
+}
+
+bool LLVOVolume::isTEFullbrightEffective(const LLTextureEntry* te)
+{
+    return te && renderFullbrightGloballyEnabled() &&
+        (renderForceFullbrightOverride() || te->getFullbright());
+}
+
+U8 LLVOVolume::getTEBumpmapEffective(const LLTextureEntry* te)
+{
+    if (!te || !renderNormalTexturesEnabled())
+    {
+        return 0;
+    }
+    return te->getBumpmap();
+}
+
+U8 LLVOVolume::getTEShinyEffective(const LLTextureEntry* te)
+{
+    if (!te || !renderSpecularTexturesEnabled())
+    {
+        return 0;
+    }
+    return te->getShiny();
+}
+
+bool LLVOVolume::renderNormalTexturesEnabled()
+{
+    static LLCachedControl<bool> render_normal_textures(gSavedSettings, "RenderEnableNormalTextures", true);
+    return render_normal_textures;
+}
+
+bool LLVOVolume::renderSpecularTexturesEnabled()
+{
+    static LLCachedControl<bool> render_specular_textures(gSavedSettings, "RenderEnableSpecularTextures", true);
+    return render_specular_textures;
+}
+
+bool LLVOVolume::renderReflectionProbeObjectsEnabled()
+{
+    static LLCachedControl<bool> render_reflection_probes(gSavedSettings, "RenderReflectionProbes", true);
+    return render_reflection_probes;
+}
+
+bool LLVOVolume::teHasMaterialNormalEffective(const LLTextureEntry* te)
+{
+    if (!te || !renderNormalTexturesEnabled())
+    {
+        return false;
+    }
+    LLMaterial* mat = te->getMaterialParams().get();
+    return mat && mat->getNormalID().notNull();
+}
+
+bool LLVOVolume::teHasMaterialSpecularEffective(const LLTextureEntry* te)
+{
+    if (!te || !renderSpecularTexturesEnabled())
+    {
+        return false;
+    }
+    LLMaterial* mat = te->getMaterialParams().get();
+    return mat && mat->getSpecularID().notNull();
+}
+
+bool LLVOVolume::teHasEnvironmentIntensityEffective(const LLTextureEntry* te)
+{
+    if (!te || !renderSpecularTexturesEnabled())
+    {
+        return false;
+    }
+    LLMaterial* mat = te->getMaterialParams().get();
+    return mat && mat->getEnvironmentIntensity() > 0;
+}
+
+bool LLVOVolume::teHasNormalMappingEffective(const LLTextureEntry* te)
+{
+    return getTEBumpmapEffective(te) || teHasMaterialNormalEffective(te);
+}
+
+bool LLVOVolume::teHasSpecularMappingEffective(const LLTextureEntry* te)
+{
+    return getTEShinyEffective(te) > 0
+        || teHasMaterialSpecularEffective(te)
+        || teHasEnvironmentIntensityEffective(te);
+}
+
+bool LLVOVolume::renderPBRMaterialsEnabled()
+{
+    static LLCachedControl<bool> render_pbr_materials(gSavedSettings, "RenderEnablePBRMaterials", true);
+    return render_pbr_materials;
+}
+
+LLGLTFMaterial* LLVOVolume::getTEPBRMaterialEffective(const LLTextureEntry* te)
+{
+    if (!te || !renderPBRMaterialsEnabled())
+    {
+        return nullptr;
+    }
+    return te->getGLTFRenderMaterial();
 }
 
 // Implementation class of LLMediaDataClientObject.  See llmediadataclient.h
@@ -951,7 +1061,7 @@ void LLVOVolume::updateTextureVirtualSize(bool forced)
         LLViewerTexture *imagep = nullptr;
         U32 ch_min;
         U32 ch_max;
-        if (!te->getGLTFRenderMaterial())
+        if (!LLVOVolume::getTEPBRMaterialEffective(te))
         {
             ch_min = LLRender::DIFFUSE_MAP;
             ch_max = LLRender::SPECULAR_MAP;
@@ -1900,7 +2010,8 @@ void LLVOVolume::updateFaceFlags()
         LLFace *face = mDrawable->getFace(i);
         if (face)
         {
-            bool fullbright = renderFullbrightEnabled() && getTEref(i).getFullbright();
+            bool fullbright = renderForceFullbrightOverride() ||
+                (renderFullbrightEnabled() && getTEref(i).getFullbright());
             face->clearState(LLFace::FULLBRIGHT | LLFace::HUD_RENDER | LLFace::LIGHT);
 
             if (fullbright || (mMaterial == LL_MCODE_LIGHT))
@@ -4416,12 +4527,12 @@ U32 LLVOVolume::getRenderCost(texture_cost_t &textures) const
 
             if (te)
             {
-                if (te->getBumpmap())
+                if (LLVOVolume::getTEBumpmapEffective(te))
                 {
                     // bump is a multiplier, don't add per-face
                     bump = 1;
                 }
-                if (te->getShiny())
+                if (LLVOVolume::getTEShinyEffective(te))
                 {
                     // shiny is a multiplier, don't add per-face
                     shiny = 1;
@@ -5467,7 +5578,7 @@ LLControlAVBridge::LLControlAVBridge(LLDrawable* drawablep, LLViewerRegion* regi
 
 bool can_batch_texture(LLFace* facep)
 {
-    if (facep->getTextureEntry()->getBumpmap())
+    if (LLVOVolume::getTEBumpmapEffective(facep->getTextureEntry()))
     { //bump maps aren't worked into texture batching yet
         return false;
     }
@@ -5503,7 +5614,7 @@ bool can_batch_texture(LLFace* facep)
         return false;
     }
 
-    if (facep->getTextureEntry()->getGLTFRenderMaterial() != nullptr)
+    if (LLVOVolume::getTEPBRMaterialEffective(facep->getTextureEntry()) != nullptr)
     { // PBR materials break indexed texture batching
         return false;
     }
@@ -5679,8 +5790,8 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
     //drawable->getVObj()->setDebugText(llformat("%d", drawable->isState(LLDrawable::ANIMATED_CHILD)));
 
     const LLTextureEntry* te = facep->getTextureEntry();
-    U8 bump = (type == LLRenderPass::PASS_BUMP || type == LLRenderPass::PASS_POST_BUMP) ? te->getBumpmap() : 0;
-    U8 shiny = te->getShiny();
+    U8 bump = (type == LLRenderPass::PASS_BUMP || type == LLRenderPass::PASS_POST_BUMP) ? LLVOVolume::getTEBumpmapEffective(te) : 0;
+    U8 shiny = LLVOVolume::getTEShinyEffective(te);
 
     LLViewerTexture* tex = facep->getTexture();
 
@@ -5690,8 +5801,8 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
 
     LLUUID mat_id;
 
-    auto* gltf_mat = (LLFetchedGLTFMaterial*)te->getGLTFRenderMaterial();
-    llassert(gltf_mat == nullptr || dynamic_cast<LLFetchedGLTFMaterial*>(te->getGLTFRenderMaterial()) != nullptr);
+    auto* gltf_mat = (LLFetchedGLTFMaterial*)LLVOVolume::getTEPBRMaterialEffective(te);
+    llassert(gltf_mat == nullptr || dynamic_cast<LLFetchedGLTFMaterial*>(LLVOVolume::getTEPBRMaterialEffective(te)) != nullptr);
 
     if (gltf_mat != nullptr)
     {
@@ -5862,7 +5973,7 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
 
             // We have a material.  Update our draw info accordingly.
 
-            if (!mat->getSpecularID().isNull())
+            if (LLVOVolume::teHasMaterialSpecularEffective(te))
             {
                 LLVector4 specColor;
                 specColor.mV[0] = mat->getSpecularLightColor().mV[0] * (1.f / 255.f);
@@ -5870,13 +5981,19 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
                 specColor.mV[2] = mat->getSpecularLightColor().mV[2] * (1.f / 255.f);
                 specColor.mV[3] = mat->getSpecularLightExponent() * (1.f / 255.f);
                 draw_info->mSpecColor = specColor;
-                draw_info->mEnvIntensity = mat->getEnvironmentIntensity() * (1.f / 255.f);
                 draw_info->mSpecularMap = facep->getViewerObject()->getTESpecularMap(facep->getTEOffset());
+            }
+            if (LLVOVolume::teHasEnvironmentIntensityEffective(te))
+            {
+                draw_info->mEnvIntensity = mat->getEnvironmentIntensity() * (1.f / 255.f);
             }
 
             draw_info->mAlphaMaskCutoff = mat->getAlphaMaskCutoff() * (1.f / 255.f);
             draw_info->mDiffuseAlphaMode = mat->getDiffuseAlphaMode();
-            draw_info->mNormalMap = facep->getViewerObject()->getTENormalMap(facep->getTEOffset());
+            if (LLVOVolume::teHasMaterialNormalEffective(te))
+            {
+                draw_info->mNormalMap = facep->getViewerObject()->getTENormalMap(facep->getTEOffset());
+            }
         }
         else
         {
@@ -6051,6 +6168,11 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
                 continue;
             }
 
+            if (vobj->isReflectionProbe() && !LLVOVolume::renderReflectionProbeObjectsEnabled())
+            {
+                continue;
+            }
+
             // HACK -- brute force this check every time a drawable gets rebuilt
             S32 num_tex = llmin(vobj->getNumTEs(), drawablep->getNumFaces());
             for (S32 i = 0; i < num_tex; ++i)
@@ -6165,9 +6287,11 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
 
                 LLFetchedGLTFMaterial* gltf_mat = nullptr;
                 const LLTextureEntry* te = facep->getTextureEntry();
+                LLGLTFMaterial* raw_gltf_mat = nullptr;
                 if (te)
                 {
-                    gltf_mat = (LLFetchedGLTFMaterial*)te->getGLTFRenderMaterial();
+                    gltf_mat = (LLFetchedGLTFMaterial*)LLVOVolume::getTEPBRMaterialEffective(te);
+                    raw_gltf_mat = te->getGLTFRenderMaterial();
                 } // if not te, continue?
                 bool is_pbr = gltf_mat != nullptr;
 
@@ -6188,6 +6312,34 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
                     facep->setTexture(LLRender::GLTF_NORMAL_MAP, gltf_mat->mNormalTexture);
                     facep->setTexture(LLRender::METALLIC_ROUGHNESS_MAP, gltf_mat->mMetallicRoughnessTexture);
                     facep->setTexture(LLRender::EMISSIVE_MAP, gltf_mat->mEmissiveTexture);
+                }
+                else if (te && raw_gltf_mat)
+                {
+                    // PBR suppressed — restore Blinn-Phong texture slots
+                    LLViewerTexture* diffuse = vobj->getTEImage(i);
+                    LLFetchedGLTFMaterial* raw_pbr = (LLFetchedGLTFMaterial*)raw_gltf_mat;
+                    if (raw_pbr && raw_pbr->mBaseColorTexture.notNull())
+                    {
+                        diffuse = raw_pbr->mBaseColorTexture;
+                    }
+                    if (!facep->hasMedia())
+                    {
+                        facep->setTexture(LLRender::DIFFUSE_MAP, diffuse);
+                    }
+                    if (te->getMaterialParams().notNull())
+                    {
+                        facep->setNormalMap(vobj->getTENormalMap(i));
+                        facep->setSpecularMap(vobj->getTESpecularMap(i));
+                    }
+                    else
+                    {
+                        facep->setTexture(LLRender::NORMAL_MAP, nullptr);
+                        facep->setTexture(LLRender::SPECULAR_MAP, nullptr);
+                    }
+                    facep->setTexture(LLRender::BASECOLOR_MAP, nullptr);
+                    facep->setTexture(LLRender::GLTF_NORMAL_MAP, nullptr);
+                    facep->setTexture(LLRender::METALLIC_ROUGHNESS_MAP, nullptr);
+                    facep->setTexture(LLRender::EMISSIVE_MAP, nullptr);
                 }
 
                 //ALWAYS null out vertex buffer on rebuild -- if the face lands in a render
@@ -6339,7 +6491,7 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
 
                         if (te)
                         {
-                            LLGLTFMaterial* gltf_mat = te->getGLTFRenderMaterial();
+                            LLGLTFMaterial* gltf_mat = LLVOVolume::getTEPBRMaterialEffective(te);
 
                             if (gltf_mat != nullptr || (te->getMaterialParams().notNull()))
                             {
@@ -6366,10 +6518,10 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
                                 else
                                 {
                                     LLMaterial* mat = te->getMaterialParams().get();
-                                    if (mat->getNormalID().notNull() || // <-- has a normal map, needs tangents
-                                        (te->getBumpmap() && (te->getBumpmap() < 18))) // <-- has an emboss bump map, needs tangents
+                                    if (LLVOVolume::teHasMaterialNormalEffective(te) || // <-- has a normal map, needs tangents
+                                        (LLVOVolume::getTEBumpmapEffective(te) && (LLVOVolume::getTEBumpmapEffective(te) < 18))) // <-- has an emboss bump map, needs tangents
                                     {
-                                        if (mat->getSpecularID().notNull())
+                                        if (LLVOVolume::teHasMaterialSpecularEffective(te))
                                         { //has normal and specular maps (needs texcoord1, texcoord2, and tangent)
                                             add_face(sNormSpecFaces, normspec_count, facep);
                                         }
@@ -6378,7 +6530,7 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
                                             add_face(sNormFaces, norm_count, facep);
                                         }
                                     }
-                                    else if (mat->getSpecularID().notNull())
+                                    else if (LLVOVolume::teHasMaterialSpecularEffective(te))
                                     { //has specular map but no normal map, needs texcoord2
                                         add_face(sSpecFaces, spec_count, facep);
                                     }
@@ -6388,11 +6540,11 @@ void LLVolumeGeometryManager::rebuildGeom(LLSpatialGroup* group)
                                     }
                                 }
                             }
-                            else if (te->getBumpmap())
+                            else if (LLVOVolume::getTEBumpmapEffective(te))
                             { //needs normal + tangent
                                 add_face(sBumpFaces, bump_count, facep);
                             }
-                            else if (te->getShiny() || !teFullbrightEnabled(te))
+                            else if (LLVOVolume::getTEShinyEffective(te) || !teFullbrightEnabled(te))
                             { //needs normal
                                 add_face(sSimpleFaces, simple_count, facep);
                             }
@@ -6605,9 +6757,9 @@ struct CompareBatchBreaker
         const LLTextureEntry* lte = lhs->getTextureEntry();
         const LLTextureEntry* rte = rhs->getTextureEntry();
 
-        if (lte->getBumpmap() != rte->getBumpmap())
+        if (LLVOVolume::getTEBumpmapEffective(lte) != LLVOVolume::getTEBumpmapEffective(rte))
         {
-            return lte->getBumpmap() < rte->getBumpmap();
+            return LLVOVolume::getTEBumpmapEffective(lte) < LLVOVolume::getTEBumpmapEffective(rte);
         }
         else if (teFullbrightEnabled(lte) != teFullbrightEnabled(rte))
         {
@@ -6617,9 +6769,9 @@ struct CompareBatchBreaker
         {
             return lte->getMaterialID() < rte->getMaterialID();
         }
-        else if (lte->getShiny() != rte->getShiny())
+        else if (LLVOVolume::getTEShinyEffective(lte) != LLVOVolume::getTEShinyEffective(rte))
         {
-            return lte->getShiny() < rte->getShiny();
+            return LLVOVolume::getTEShinyEffective(lte) < LLVOVolume::getTEShinyEffective(rte);
         }
         else if (lhs->getTexture() != rhs->getTexture())
         {
@@ -6946,7 +7098,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
             }
 
             const LLTextureEntry* te = facep->getTextureEntry();
-            LLGLTFMaterial* gltf_mat = te->getGLTFRenderMaterial();
+            LLGLTFMaterial* gltf_mat = LLVOVolume::getTEPBRMaterialEffective(te);
 
             if (hud_group && gltf_mat == nullptr)
             { //all hud attachments are fullbright
@@ -6975,7 +7127,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
             }
 
             F32 blinn_phong_alpha = te->getColor().mV[3];
-            bool use_legacy_bump = te->getBumpmap() && (te->getBumpmap() < 18) && (!mat || mat->getNormalID().isNull());
+            bool use_legacy_bump = LLVOVolume::getTEBumpmapEffective(te) && (LLVOVolume::getTEBumpmapEffective(te) < 18) && !LLVOVolume::teHasMaterialNormalEffective(te);
             bool blinn_phong_opaque = blinn_phong_alpha >= 0.999f;
             bool blinn_phong_transparent = blinn_phong_alpha < 0.999f;
 
@@ -7028,7 +7180,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
                     }
                     else
                     {
-                        if (mat->getEnvironmentIntensity() > 0 || te->getShiny() > 0)
+                        if (LLVOVolume::teHasEnvironmentIntensityEffective(te) || LLVOVolume::getTEShinyEffective(te) > 0)
                         {
                             material_pass = true;
                         }
@@ -7127,7 +7279,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
                     registerFace(group, facep, LLRenderPass::PASS_ALPHA);
                 }
                 else if (gPipeline.shadersLoaded()
-                    && te->getShiny()
+                    && LLVOVolume::getTEShinyEffective(te)
                     && can_be_shiny)
                 {
                     registerFace(group, facep, fullbright ? LLRenderPass::PASS_FULLBRIGHT_SHINY : LLRenderPass::PASS_SHINY);
@@ -7162,7 +7314,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
                 }
             }
             else if (gPipeline.shadersLoaded()
-                && te->getShiny()
+                && LLVOVolume::getTEShinyEffective(te)
                 && can_be_shiny)
             { //shiny
                 if (tex && tex->getPrimaryFormat() == GL_ALPHA)
@@ -7178,7 +7330,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
                     if (teFullbrightEnabled(te))
                     { //register in post deferred fullbright shiny pass
                         registerFace(group, facep, LLRenderPass::PASS_FULLBRIGHT_SHINY);
-                        if (te->getBumpmap())
+                        if (LLVOVolume::getTEBumpmapEffective(te))
                         { //register in post deferred bump pass
                             registerFace(group, facep, LLRenderPass::PASS_POST_BUMP);
                         }
@@ -7251,7 +7403,7 @@ U32 LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFace
 
                 if (!gPipeline.shadersLoaded() &&
                     !is_alpha &&
-                    te->getShiny())
+                    LLVOVolume::getTEShinyEffective(te))
                 { //shiny as an extra pass when shaders are disabled
                     registerFace(group, facep, LLRenderPass::PASS_SHINY);
                 }
