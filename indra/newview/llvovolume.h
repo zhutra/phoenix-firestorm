@@ -114,6 +114,24 @@ public:
     static      void    cleanupClass();
     static      void    preUpdateGeom();
 
+    // <FS:AYAstorm> Global TE render filters (Lighting tab cvars)
+    static bool renderFullbrightGloballyEnabled();
+    static bool renderForceFullbrightOverride();
+    static bool isTEFullbrightEffective(const LLTextureEntry* te);
+    static bool renderPBRMaterialsEnabled();
+    static LLGLTFMaterial* getTEPBRMaterialEffective(const LLTextureEntry* te);
+    static bool renderNormalTexturesEnabled();
+    static bool renderSpecularTexturesEnabled();
+    static U8   getTEBumpmapEffective(const LLTextureEntry* te);
+    static U8   getTEShinyEffective(const LLTextureEntry* te);
+    static bool teHasMaterialNormalEffective(const LLTextureEntry* te);
+    static bool teHasMaterialSpecularEffective(const LLTextureEntry* te);
+    static bool teHasEnvironmentIntensityEffective(const LLTextureEntry* te);
+    static bool teHasNormalMappingEffective(const LLTextureEntry* te);
+    static bool teHasSpecularMappingEffective(const LLTextureEntry* te);
+    static bool renderReflectionProbeObjectsEnabled();
+    // </FS:AYAstorm>
+
     enum
     {
         VERTEX_DATA_MASK =  (1 << LLVertexBuffer::TYPE_VERTEX) |
