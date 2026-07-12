@@ -1,20 +1,20 @@
-# Ayastorm Viewer ビルド手順書
+# AYAstorm Viewer Build Instructions
 
-Linux版 / Windows版
-2026年4月
+Linux / Windows
+April 2026
 
 ---
 
-## Linux版ビルド手順
+## Linux Build Steps
 
-### 1. 必要な環境
+### 1. Required Environment
 
 - Ubuntu 22.04 LTS (x86_64)
-- RAM 16GB以上、ストレージ 64GB以上
-- GCC 11（Ubuntu 22.04のデフォルト）
-- Python 3（venv使用推奨）
+- 16 GB RAM or more, 64 GB storage or more
+- GCC 11 (Ubuntu 22.04 default)
+- Python 3 (venv recommended)
 
-### 2. 必要パッケージのインストール（一度だけ）
+### 2. Install Required Packages (one-time)
 
 ```bash
 sudo apt install libgl1-mesa-dev libglu1-mesa-dev libpulse-dev build-essential \
@@ -22,7 +22,7 @@ sudo apt install libgl1-mesa-dev libglu1-mesa-dev libpulse-dev build-essential \
   libfontconfig-dev libfreetype6-dev gcc-11 cmake
 ```
 
-### 3. ディレクトリ作成とリポジトリのclone
+### 3. Create Directories and Clone Repositories
 
 ```bash
 mkdir ~/work_ayastorm && cd ~/work_ayastorm
@@ -30,12 +30,12 @@ git clone https://github.com/mayatonton/phoenix-firestorm.git
 cd phoenix-firestorm
 git checkout ayastorm-release
 
-# ビルド変数リポジトリ
+# Build variables repository
 cd ~/work_ayastorm
 git clone https://github.com/FirestormViewer/fs-build-variables.git
 ```
 
-### 4. Python仮想環境とautobuildのセットアップ（一度だけ）
+### 4. Set Up Python venv and autobuild (one-time)
 
 ```bash
 cd ~/work_ayastorm/phoenix-firestorm
@@ -44,53 +44,56 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5. 環境変数の設定
+### 5. Environment Variables
 
-毎回ビルド前に実行するか `~/.bashrc` に追記しておく：
+Run before each build, or add to `~/.bashrc`:
 
 ```bash
 source ~/work_ayastorm/phoenix-firestorm/.venv/bin/activate
 export AUTOBUILD_VARIABLES_FILE=$HOME/work_ayastorm/fs-build-variables/variables
 ```
 
-### 6. FMODのセットアップ（一度だけ）
+### 6. FMOD Setup (one-time)
 
-https://www.fmod.com で無料アカウントを作成してLinux版 **FMOD Studio API** をダウンロード（バージョン2.03.07）。
+Create a free account at https://www.fmod.com and download the Linux **FMOD Studio API** (version 2.03.07).
 
 ```bash
 cd ~/work_ayastorm
-# AYAstorm は SDK 同梱の libopus を staging する fork を使う (Opus 5.1 surround 対応のため)
+# AYAstorm uses a fork that stages libopus bundled with the SDK (for Opus 5.1 surround support)
 git clone https://github.com/mayatonton/3p-fmodstudio.git
-cp ~/ダウンロード/fmodstudioapi20307linux.tar.gz ~/work_ayastorm/3p-fmodstudio/
+cp ~/Downloads/fmodstudioapi20307linux.tar.gz ~/work_ayastorm/3p-fmodstudio/
 cd ~/work_ayastorm/3p-fmodstudio
 autobuild build -A 64 --all
 autobuild package -A 64 --results-file result.txt
-cat result.txt  # md5値を確認
+cat result.txt  # check md5 hash
 ```
 
-result.txt の md5 値を確認してFirestormに登録：
+Register the md5 from result.txt with Firestorm:
 
 ```bash
 cd ~/work_ayastorm/phoenix-firestorm
 autobuild installables edit fmodstudio platform=linux64 \
-  hash=<md5値> \
+  hash=<md5-value> \
   url=file:///home/{user name}/work_ayastorm/3p-fmodstudio/fmodstudio-2.03.07-linux64-*.tar.bz2
 ```
 
-### 7. configure（初回または --clean のとき）
+### 7. configure (first run or after --clean)
 
 ```bash
 cd ~/work_ayastorm/phoenix-firestorm
 autobuild configure -A 64 -c ReleaseFS_open --   --fmodstudio -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
 ```
 
-### 8. ビルド
+### 8. Build
 
 ```bash
 autobuild build -A 64 -c ReleaseFS_open --no-configure
 ```
 
-### 9. キャッシュの削除 & インストール
+### 9. Clear Cache and Install
+
+```bash
+cd ~/work_ayastorm/phoenix-firestorm
 autobuild configure -A 64 -c ReleaseFS_open --   --fmodstudio -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
 autobuild build -A 64 -c ReleaseFS_open
 
@@ -99,52 +102,51 @@ rm -rf ~/ayastorm/
 rm -rf ~/.local/share/applications/ayastorm-viewer.desktop
 ./install.sh
 rm -rf ~/.ayastorm_x64/cache/
-
-### 10. 実行
-```bash
-~/ayastorm/ayastorm 
 ```
 
+### 10. Run
 
-
+```bash
+~/ayastorm/ayastorm
+```
 
 ---
 
-## Windows版ビルド手順
+## Windows Build Steps
 
-### 1. 必要ツールのインストール（一度だけ）
+### 1. Install Required Tools (one-time)
 
-> **重要：** すべての作業はPowerShellではなく **cmd.exe（コマンドプロンプト）管理者モード** で行う。
+> **Important:** Do all work in **cmd.exe (Command Prompt) as Administrator**, not PowerShell.
 
-#### Visual Studio 2022 Community（無料）
+#### Visual Studio 2022 Community (free)
 
-- 管理者として実行
-- 「Desktop development with C++」にチェック
+- Run as Administrator
+- Check "Desktop development with C++"
 
 #### Git for Windows
 
-- 「Checkout as-is, commit as-is」を選択（**重要！**）
+- Select "Checkout as-is, commit as-is" (**important!**)
 
-#### CMake 4.1.2以上
+#### CMake 4.1.2 or newer
 
-- 「Add CMake to the system PATH for all users」を選択
+- Select "Add CMake to the system PATH for all users"
 
 #### Cygwin 64
 
-- 管理者として実行
-- 追加パッケージ：`Devel/patch` を選択
+- Run as Administrator
+- Add package: `Devel/patch`
 
 #### Python 3
 
-- 管理者として実行
-- 「Add Python to PATH」にチェック
-- インストール先：`C:\Python3`
+- Run as Administrator
+- Check "Add Python to PATH"
+- Install to: `C:\Python3`
 
-#### NSIS（インストーラー作成用）
+#### NSIS (for installer creation)
 
-- https://nsis.sourceforge.io からダウンロード
+- Download from https://nsis.sourceforge.io
 
-### 2. リポジトリのclone
+### 2. Clone Repositories
 
 ```cmd
 c:
@@ -158,16 +160,16 @@ cd c:\work_ayastorm
 git clone https://github.com/FirestormViewer/fs-build-variables.git
 ```
 
-### 3. autobuildのセットアップ（一度だけ）
+### 3. Set Up autobuild (one-time)
 
 ```cmd
 cd c:\work_ayastorm\phoenix-firestorm
 pip install -r requirements.txt
 ```
 
-### 4. 環境変数の設定
+### 4. Environment Variables
 
-ビルドのたびに **管理者cmd** で以下を実行：
+Run in **Administrator cmd** before each build:
 
 ```cmd
 set PYTHONUTF8=1
@@ -177,15 +179,15 @@ set PATH=C:\cygwin64\bin;%PATH%
 set AUTOBUILD_CONFIG_FILE=my_autobuild.xml
 ```
 
-> `my_autobuild.xml` はFMODセットアップ後に作成されます。
+> `my_autobuild.xml` is created after FMOD setup.
 
-### 5. FMODのセットアップ（一度だけ）
+### 5. FMOD Setup (one-time)
 
-https://www.fmod.com で無料アカウントを作成してWindows版 **FMOD Studio API** をダウンロード（バージョン2.03.07）。
+Create a free account at https://www.fmod.com and download the Windows **FMOD Studio API** (version 2.03.07).
 
 ```cmd
 cd c:\work_ayastorm
-:: AYAstorm は SDK 同梱の libopus を staging する fork を使う (Opus 5.1 surround 対応のため)
+:: AYAstorm uses a fork that stages libopus bundled with the SDK (for Opus 5.1 surround support)
 git clone https://github.com/mayatonton/3p-fmodstudio.git
 copy fmodstudioapi20307win-installer.exe c:\work_ayastorm\3p-fmodstudio\
 cd c:\work_ayastorm\3p-fmodstudio
@@ -194,20 +196,20 @@ autobuild package -A 64 --results-file result.txt
 type result.txt
 ```
 
-result.txt の md5 値を確認してFirestormに登録：
+Register the md5 from result.txt with Firestorm:
 
 ```cmd
 cd c:\work_ayastorm\phoenix-firestorm
 copy autobuild.xml my_autobuild.xml
 set AUTOBUILD_CONFIG_FILE=my_autobuild.xml
 autobuild installables edit fmodstudio platform=windows64 ^
-  hash=<md5値> ^
+  hash=<md5-value> ^
   url=file:///c:/work_ayastorm/3p-fmodstudio/fmodstudio-2.03.07-windows64-*.tar.bz2
 ```
 
 ### 6. configure (Legacy)
 
-管理者cmdで環境変数を設定した後に実行：
+After setting environment variables in Administrator cmd:
 
 ```cmd
 cd c:\work_ayastorm\phoenix-firestorm
@@ -215,13 +217,13 @@ rmdir /s /q build-vc170-64
 autobuild configure -A 64 -c ReleaseFS_open -- --fmodstudio -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
 ```
 
-### 7. ビルド (Legacy)
+### 7. Build (Legacy)
 
 ```cmd
 autobuild build -A 64 -c ReleaseFS_open --no-configure
 ```
 
-### 8. インストーラーの場所 (Legacy)
+### 8. Installer Location (Legacy)
 
 ```
 c:\work_ayastorm\phoenix-firestorm\build-vc170-64\newview\Release\
@@ -230,7 +232,7 @@ Phoenix-FirestormOS-Ayastorm-release_LEGACY-7-2-4-80621_Setup.exe
 
 ### 9. configure (AVX2)
 
-管理者cmdで環境変数を設定した後に実行：
+After setting environment variables in Administrator cmd:
 
 ```cmd
 cd c:\work_ayastorm\phoenix-firestorm
@@ -238,16 +240,15 @@ rmdir /s /q build-vc170-64
 autobuild configure -A 64 -c ReleaseFS_open -- --fmodstudio --avx2 -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
 ```
 
-### 10. ビルド (AVX2)
+### 10. Build (AVX2)
 
 ```cmd
 autobuild build -A 64 -c ReleaseFS_AVX2 --no-configure
 ```
 
-### 11. インストーラーの場所 (AVX2)
+### 11. Installer Location (AVX2)
 
 ```
 c:\work_ayastorm\phoenix-firestorm\build-vc170-64\newview\Release\
 Phoenix-FirestormOS-AYAstorm-release_AVX2-7-2-4-80621_Setup.exe
 ```
-
