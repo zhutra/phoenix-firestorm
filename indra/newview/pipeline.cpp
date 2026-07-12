@@ -2291,7 +2291,7 @@ U32 LLPipeline::getPoolTypeFromTE(const LLTextureEntry* te, LLViewerTexture* ima
     }
 
     LLMaterial* mat = te->getMaterialParams().get();
-    LLGLTFMaterial* gltf_mat = te->getGLTFRenderMaterial();
+    LLGLTFMaterial* gltf_mat = LLVOVolume::getTEPBRMaterialEffective(te);
 
     bool color_alpha = te->getColor().mV[3] < 0.999f;
     bool alpha = color_alpha;
@@ -2321,7 +2321,7 @@ U32 LLPipeline::getPoolTypeFromTE(const LLTextureEntry* te, LLViewerTexture* ima
     {
         return LLDrawPool::POOL_ALPHA;
     }
-    else if ((te->getBumpmap() || te->getShiny()) && (!mat || mat->getNormalID().isNull()))
+    else if ((LLVOVolume::getTEBumpmapEffective(te) || LLVOVolume::getTEShinyEffective(te)) && !LLVOVolume::teHasMaterialNormalEffective(te))
     {
         return LLDrawPool::POOL_BUMP;
     }
