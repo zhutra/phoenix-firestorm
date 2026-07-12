@@ -386,6 +386,10 @@ static bool handleEnableEmissiveChanged(const LLSD& newvalue)
 
 static bool handleRenderEnableFullbrightChanged(const LLSD& newvalue)
 {
+    gSavedSettings.setBOOL("RenderForceFullbrightActive",
+        gSavedSettings.getBOOL("AYACinematicModeActive") &&
+        gSavedSettings.getBOOL("RenderEnableFullbright"));
+
     for (S32 i = 0, count = gObjectList.getNumObjects(); i < count; ++i)
     {
         LLViewerObject* objectp = gObjectList.getObject(i);
@@ -396,11 +400,17 @@ static bool handleRenderEnableFullbrightChanged(const LLSD& newvalue)
             {
                 volume->updateFaceFlags();
                 volume->markForUpdate();
+                gPipeline.markRebuild(drawablep, LLDrawable::REBUILD_VOLUME);
             }
         }
     }
 
     return true;
+}
+
+static bool handleRenderTEFiltersChanged(const LLSD& newvalue)
+{
+    return handleRenderEnableFullbrightChanged(newvalue);
 }
 
 static bool handleDisableVintageMode(const LLSD& newvalue)
@@ -1572,6 +1582,11 @@ void settings_setup_listeners()
     setting_setup_signal_listener(gSavedSettings, "RenderGlowNoise", handleSetShaderChanged);
     setting_setup_signal_listener(gSavedSettings, "RenderGammaFull", handleSetShaderChanged);
     setting_setup_signal_listener(gSavedSettings, "RenderEnableFullbright", handleRenderEnableFullbrightChanged);
+    setting_setup_signal_listener(gSavedSettings, "RenderForceFullbright", handleRenderTEFiltersChanged);
+    setting_setup_signal_listener(gSavedSettings, "RenderEnableNormalTextures", handleRenderTEFiltersChanged);
+    setting_setup_signal_listener(gSavedSettings, "RenderEnableSpecularTextures", handleRenderTEFiltersChanged);
+    setting_setup_signal_listener(gSavedSettings, "RenderEnablePBRMaterials", handleRenderTEFiltersChanged);
+    setting_setup_signal_listener(gSavedSettings, "RenderReflectionProbes", handleRenderTEFiltersChanged);
     setting_setup_signal_listener(gSavedSettings, "FSOverrideVRAMDetection", handleOverrideVRAMDetectionChanged); // <FS:Beq/> Override VRAM detection support
     setting_setup_signal_listener(gSavedSettings, "RenderVolumeLODFactor", handleVolumeLODChanged);
     setting_setup_signal_listener(gSavedSettings, "RenderAvatarComplexityMode", handleUserImpostorByDistEnabledChanged);
@@ -1865,6 +1880,8 @@ void settings_setup_listeners()
         const U32 mode_v = gSavedSettings.getU32("AYAVisualRealismEnabled");
         gSavedSettings.setBOOL("AYACinematicModeActive", mode_v == 2);
         gSavedSettings.setBOOL("AYAR20SSSEffective",     mode_v > 0);
+        gSavedSettings.setBOOL("RenderForceFullbrightActive",
+            (mode_v == 2) && gSavedSettings.getBOOL("RenderEnableFullbright"));
         // </FS:AYA>
         if (LLStartUp::getStartupState() >= STATE_LOGIN_SHOW)
         {
@@ -1886,6 +1903,8 @@ void settings_setup_listeners()
         const U32 mode_v = gSavedSettings.getU32("AYAVisualRealismEnabled");
         gSavedSettings.setBOOL("AYACinematicModeActive", mode_v == 2);
         gSavedSettings.setBOOL("AYAR20SSSEffective",     mode_v > 0);
+        gSavedSettings.setBOOL("RenderForceFullbrightActive",
+            (mode_v == 2) && gSavedSettings.getBOOL("RenderEnableFullbright"));
     }
     // </FS:AYA>
     // </FS:AYAstorm r30 P1>
