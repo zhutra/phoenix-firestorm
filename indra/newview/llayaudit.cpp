@@ -76,6 +76,7 @@ const LLAYAudit::CvarSpec LLAYAudit::sSpecs[] = {
     {"RenderDeferredBlurLight",                              CV_BOOL, 0, 1,         nullptr},
     {"RenderGlow",                                           CV_BOOL, 0, 1,         nullptr},
     {"RenderAttachedParticles",                              CV_BOOL, 0, 1,         nullptr},
+    {"RenderReflectionProbes",                               CV_BOOL, 0, 1,         nullptr},
     {"RenderReflectionProbeLevel",                           CV_S32,  0, 3,         nullptr},
     {"RenderShadowDetail",                                   CV_S32,  0, 3,         nullptr},
     {"RenderShadowAutomaticDistance",                        CV_BOOL, 0, 1,         nullptr},
