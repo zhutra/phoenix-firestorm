@@ -92,7 +92,7 @@
     <key>Type</key>
     <string>String</string>
     <key>Value</key>
-    <string>grey</string>
+    <string>ctrlaltstudio</string>
   </map>
 
   <key>FSSkinCurrentReadableName</key>
@@ -120,7 +120,7 @@
     <key>Type</key>
     <string>String</string>
     <key>Value</key>
-    <string>Grey</string>
+    <string>CtrlAltStudio</string>
   </map>
 
   <key>LetterKeysAffectsMovementNotFocusChatBar</key>
@@ -241,7 +241,7 @@
     <key>Type</key>
     <string>S32</string>
     <key>Value</key>
-    <integer>2</integer>
+    <integer>1</integer>
   </map>
   <key>AYALLChatCompactView</key>
   <map>
