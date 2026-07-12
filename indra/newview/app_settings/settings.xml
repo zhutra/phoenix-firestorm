@@ -947,7 +947,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>grey</string>
+      <string>ctrlaltstudio</string>
     </map>
 
     <key>ShowSearchTopBar</key>
@@ -1765,7 +1765,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>ApplyColorImmediately</key>
     <map>
@@ -1810,7 +1810,7 @@
     <key>Type</key>
     <string>Boolean</string>
     <key>Value</key>
-    <integer>0</integer>
+    <integer>1</integer>
   </map>
   <key>PrivateLocalLookAtTarget</key>
   <map>
@@ -1821,7 +1821,7 @@
     <key>Type</key>
     <string>Boolean</string>
     <key>Value</key>
-    <integer>0</integer>
+    <integer>1</integer>
   </map>
   <key>PrivatePointAtTarget</key>
   <map>
@@ -1832,7 +1832,7 @@
     <key>Type</key>
     <string>Boolean</string>
     <key>Value</key>
-    <integer>0</integer>
+    <integer>1</integer>
   </map>
   <key>ArrowKeysAlwaysMove</key>
     <map>
@@ -4961,7 +4961,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>DisableCrashLogger</key>
     <map>
@@ -9930,7 +9930,7 @@ Change of this parameter will affect the layout of buttons in notification toast
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
-      <integer>2</integer>
+      <integer>1</integer>
     </map>
     <key>AYALLChatCompactView</key>
     <map>
@@ -10222,13 +10222,13 @@ Change of this parameter will affect the layout of buttons in notification toast
     <key>AYAR15GodraysInCinematicEnabled</key>
     <map>
       <key>Comment</key>
-      <string>r15 Godrays (godraysF post-process pass) を Cinematic mode で有効化。default ON (BD改善 phase 確定)。AYAVisualRealismEnabled==2 のとき有効。既存ユーザーは AYAR15GodraysCinematicMigrationVersion 経由で一度だけ強制 true 化される</string>
+      <string>r15 Godrays (godraysF post-process pass) を Cinematic mode で有効化。default OFF。AYAVisualRealismEnabled==2 のとき opt-in で有効</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>AYAR15GodraysPhaseExponent</key>
     <map>
@@ -10255,13 +10255,13 @@ Change of this parameter will affect the layout of buttons in notification toast
     <key>AYAR15GodraysCinematicMigrationVersion</key>
     <map>
       <key>Comment</key>
-      <string>AYAR15GodraysInCinematicEnabled default flip (OFF -> ON) one-shot migration の version sentinel。0=未適用 (起動時に強制 true 上書き)、1=適用済 (no-op)。手動で 0 に戻すと再 migration が走る</string>
+      <string>AYAR15GodraysInCinematicEnabled default migration version sentinel。1=適用済 (no-op)</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>AYAR31GlowMinLuminanceMigrationVersion</key>
     <map>
@@ -12371,7 +12371,7 @@ Change of this parameter will affect the layout of buttons in notification toast
     <key>Type</key>
     <string>Boolean</string>
     <key>Value</key>
-    <integer>1</integer>
+    <integer>0</integer>
   </map>
 
   <key>RenderVolumetricLightingResolution</key>
@@ -12709,6 +12709,72 @@ Change of this parameter will affect the layout of buttons in notification toast
     <string>Boolean</string>
     <key>Value</key>
     <integer>1</integer>
+  </map>
+  <key>RenderForceFullbright</key>
+  <map>
+    <key>Comment</key>
+    <string>If true (and RenderEnableFullbright is true), all surfaces render as fullbright regardless of creator settings. Global。</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>1</integer>
+  </map>
+  <key>RenderEnablePBRMaterials</key>
+  <map>
+    <key>Comment</key>
+    <string>If false, PBR Metallic Roughness materials are suppressed globally and surfaces fall back to Blinn-Phong (Textures). Global。</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>0</integer>
+  </map>
+  <key>RenderEnableNormalTextures</key>
+  <map>
+    <key>Comment</key>
+    <string>If false, bump/normal (bumpiness) textures are suppressed globally. Global。</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>1</integer>
+  </map>
+  <key>RenderEnableSpecularTextures</key>
+  <map>
+    <key>Comment</key>
+    <string>If false, specular (shininess) textures are suppressed globally. Global。</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>1</integer>
+  </map>
+  <key>RenderReflectionProbes</key>
+  <map>
+    <key>Comment</key>
+    <string>If true, reflection probe prims are drawn in the world; if false, they are hidden from rendering. Global。</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>1</integer>
+  </map>
+  <key>RenderForceFullbrightActive</key>
+  <map>
+    <key>Comment</key>
+    <string>Helper Boolean shadow of (AYACinematicModeActive &amp;&amp; RenderEnableFullbright). XUI enabled_control for RenderForceFullbright widget. llviewercontrol.cpp syncs, Persist=0</string>
+    <key>Persist</key>
+    <integer>0</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <integer>0</integer>
   </map>
   <!-- </FS:AYAstorm:r30-bd-port> -->
   <!-- <FS:AYAstorm:r30-bd-port> Phase 6 step 3: BD Post FX cvar (Cinematic 限定)。
@@ -22870,7 +22936,7 @@ Change of this parameter will affect the layout of buttons in notification toast
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>Grey</string>
+      <string>CtrlAltStudio</string>
     </map>
     <key>FSStatusbarShowSimulatorVersion</key>
     <map>
@@ -28013,7 +28079,7 @@ Change of this parameter will affect the layout of buttons in notification toast
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <boolean>1</boolean>
+      <boolean>0</boolean>
     </map>
     <key>FSInternalCanEditObjectFaces</key>
     <map>
