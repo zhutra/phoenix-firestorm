@@ -43,6 +43,27 @@
 // <FS:AYAstorm:r30-bd-port> Phase 6 step 2: BD RenderEnableFullbright (global).
 #include "llcontrol.h"
 extern LLControlGroup gSavedSettings;
+
+static U8 ayastorm_filter_bump_byte(U8 bump)
+{
+    if (!gSavedSettings.getBOOL("RenderEnableFullbright"))
+    {
+        bump &= ~(TEM_FULLBRIGHT_MASK << TEM_FULLBRIGHT_SHIFT);
+    }
+    else if (gSavedSettings.getBOOL("RenderForceFullbright"))
+    {
+        bump |= (TEM_FULLBRIGHT_MASK << TEM_FULLBRIGHT_SHIFT);
+    }
+    if (!gSavedSettings.getBOOL("RenderEnableNormalTextures"))
+    {
+        bump &= ~TEM_BUMP_MASK;
+    }
+    if (!gSavedSettings.getBOOL("RenderEnableSpecularTextures"))
+    {
+        bump &= ~(TEM_SHINY_MASK << TEM_SHINY_SHIFT);
+    }
+    return bump;
+}
 // </FS:AYAstorm:r30-bd-port>
 
 /**
@@ -1266,14 +1287,8 @@ bool LLPrimitive::packTEMessage(LLMessageSystem *mesgsys) const
             offset_s[face_index] = (S16) ll_round((llclamp(te.mOffsetS,-1.0f,1.0f) * (F32)0x7FFF)) ;
             offset_t[face_index] = (S16) ll_round((llclamp(te.mOffsetT,-1.0f,1.0f) * (F32)0x7FFF)) ;
             image_rot[face_index] = (S16) ll_round(((fmod(te.mRotation, F_TWO_PI)/F_TWO_PI) * TEXTURE_ROTATION_PACK_FACTOR));
-            // <FS:AYAstorm:r30-bd-port> Phase 6 step 2: BD RenderEnableFullbright (global).
-            if (!gSavedSettings.getBOOL("RenderEnableFullbright"))
-            {
-                bump[face_index] = te.getBumpShiny();
-            }
-            else
-            // </FS:AYAstorm:r30-bd-port>
-            bump[face_index] = te.getBumpShinyFullbright();
+            // <FS:AYAstorm:r30-bd-port> Phase 6 step 2: global TE bump/shiny/fullbright filters.
+            bump[face_index] = ayastorm_filter_bump_byte(te.getBumpShinyFullbright());
             media_flags[face_index] = te.getMediaTexGen();
             glow[face_index] = (U8) ll_round((llclamp(te.getGlow(), 0.0f, 1.0f) * (F32)0xFF));
 
@@ -1358,14 +1373,8 @@ bool LLPrimitive::packTEMessage(LLDataPacker &dp) const
             offset_s[face_index] = (S16) ll_round((llclamp(te.mOffsetS,-1.0f,1.0f) * (F32)0x7FFF)) ;
             offset_t[face_index] = (S16) ll_round((llclamp(te.mOffsetT,-1.0f,1.0f) * (F32)0x7FFF)) ;
             image_rot[face_index] = (S16) ll_round(((fmod(te.mRotation, F_TWO_PI)/F_TWO_PI) * TEXTURE_ROTATION_PACK_FACTOR));
-            // <FS:AYAstorm:r30-bd-port> Phase 6 step 2: BD RenderEnableFullbright (global).
-            if (!gSavedSettings.getBOOL("RenderEnableFullbright"))
-            {
-                bump[face_index] = te.getBumpShiny();
-            }
-            else
-            // </FS:AYAstorm:r30-bd-port>
-            bump[face_index] = te.getBumpShinyFullbright();
+            // <FS:AYAstorm:r30-bd-port> Phase 6 step 2: global TE bump/shiny/fullbright filters.
+            bump[face_index] = ayastorm_filter_bump_byte(te.getBumpShinyFullbright());
             media_flags[face_index] = te.getMediaTexGen();
             glow[face_index] = (U8) ll_round((llclamp(te.getGlow(), 0.0f, 1.0f) * (F32)0xFF));
 
@@ -1482,14 +1491,8 @@ S32 LLPrimitive::applyParsedTEMessage(LLTEContents& tec)
         retval |= setTEScale(i, tec.scale_s[i], tec.scale_t[i]);
         retval |= setTEOffset(i, (F32)tec.offset_s[i] / (F32)0x7FFF, (F32) tec.offset_t[i] / (F32) 0x7FFF);
         retval |= setTERotation(i, ((F32)tec.image_rot[i] / TEXTURE_ROTATION_PACK_FACTOR) * F_TWO_PI);
-        // <FS:AYAstorm:r30-bd-port> Phase 6 step 2: BD RenderEnableFullbright (global).
-        if (!gSavedSettings.getBOOL("RenderEnableFullbright"))
-        {
-            retval |= setTEBumpShiny(i, tec.bump[i]);
-        }
-        else
-        // </FS:AYAstorm:r30-bd-port>
-        retval |= setTEBumpShinyFullbright(i, tec.bump[i]);
+        // <FS:AYAstorm:r30-bd-port> Phase 6 step 2: global TE bump/shiny/fullbright filters.
+        retval |= setTEBumpShinyFullbright(i, ayastorm_filter_bump_byte(tec.bump[i]));
         retval |= setTEMediaTexGen(i, tec.media_flags[i]);
         retval |= setTEGlow(i, (F32)tec.glow[i] / (F32)0xFF);
         retval |= setTEMaterialID(i, tec.material_ids[i]);
