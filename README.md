@@ -4,7 +4,7 @@
 
 [**AYAstorm**](https://github.com/mayatonton/phoenix-firestorm) is a custom Second Life viewer based on **Firestorm**. It adds rendering enhancements, UI improvements, and first-class Japanese language support.
 
-**This** fork introduces extra lighting controls to help achieve a **neutral**, modern-day look reminiscent of pre-PBR Second Life, while avoiding the constant _crashes_ of old viewer builds.
+**This** fork introduces extra lighting controls to help achieve a **neutral** look reminiscent of pre-PBR Second Life, while avoiding the constant _crashes_ of old viewer builds.
 
 [![Download](https://badgen.net/badge/icon/v7.2.4-ayastorm-r31-bugfix-2?icon=windows&label&color=157cca)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![Download](https://badgen.net/badge/icon/coming%20soon?icon=linux&label&color=f4bc00)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![Download](https://badgen.net/badge/icon/coming%20soon?icon=apple&label&color=a2aaad)](https://github.com/zhutra/phoenix-firestorm/releases/latest)
 
