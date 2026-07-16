@@ -4,7 +4,9 @@
 
 [**AYAstorm**](https://github.com/mayatonton/phoenix-firestorm) is a custom Second Life viewer based on **Firestorm**. It adds rendering enhancements, UI improvements, and first-class Japanese language support.
 
-This fork introduces extra lighting controls to help achieve a **neutral**, modern-day look reminiscent of pre-PBR Second Life, while avoiding the constant _crashes_ of old viewer builds.
+**This** fork introduces extra lighting controls to help achieve a **neutral**, modern-day look reminiscent of pre-PBR Second Life, while avoiding the constant _crashes_ of old viewer builds.
+
+[![Download](https://badgen.net/badge/icon/v7.2.4-ayastorm-r31-bugfix-2?icon=windows&label&color=157cca)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![Download](https://badgen.net/badge/icon/coming%20soon?icon=linux&label&color=f4bc00)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![Download](https://badgen.net/badge/icon/coming%20soon?icon=apple&label&color=a2aaad)](https://github.com/zhutra/phoenix-firestorm/releases/latest)
 
 ## Features
 
@@ -34,6 +36,12 @@ Open from the **AYAstorm** top menu → **AYAstorm Controls**, or press `Alt+C`.
 - **Render reflection probes** - If off, reflection probe prims are hidden from the scene. Does not affect probe-based reflections on other surfaces
 
 > **Note**: The list above highlights only the settings newly introduced in this release. AYAstorm Controls incorporated many other tuning options, also included. For the full list and details, refer to the [AYAstorm repository](https://github.com/mayatonton/phoenix-firestorm/#ayastorm-controls).
+
+### Other
+
+<img alt="Discord" src="https://github.com/user-attachments/assets/35d76d34-ebfe-4143-ba43-8e4c5adfb92e" />
+
+- **Discord Rich Presence** - Aligned with the official [Second Life viewer](https://github.com/secondlife/viewer), so your status reads playing Second Life
 
 ## Download
 
