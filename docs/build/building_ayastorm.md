@@ -1,7 +1,6 @@
 # AYAstorm Viewer Build Instructions
 
-Linux / Windows
-April 2026
+Linux / Windows July 2026
 
 ---
 
@@ -16,17 +15,27 @@ April 2026
 
 ### 2. Install Required Packages (one-time)
 
+Ubuntu:
+
 ```bash
 sudo apt install libgl1-mesa-dev libglu1-mesa-dev libpulse-dev build-essential \
-  python3-pip git libssl-dev libxinerama-dev libxrandr-dev \
-  libfontconfig-dev libfreetype6-dev gcc-11 cmake
+python3-pip git libssl-dev libxinerama-dev libxrandr-dev \
+libfontconfig-dev libfreetype6-dev gcc-11 cmake
+```
+
+Fedora:
+
+```bash
+sudo dnf install -y @development-tools gcc gcc-c++ cmake python3-pip git \
+mesa-libGL-devel mesa-libGLU-devel pulseaudio-libs-devel openssl-devel \
+libXinerama-devel libXrandr-devel fontconfig-devel freetype-devel
 ```
 
 ### 3. Create Directories and Clone Repositories
 
 ```bash
 mkdir ~/work_ayastorm && cd ~/work_ayastorm
-git clone https://github.com/mayatonton/phoenix-firestorm.git
+git clone https://github.com/zhutra/phoenix-firestorm.git
 cd phoenix-firestorm
 git checkout ayastorm-release
 
@@ -77,26 +86,29 @@ autobuild installables edit fmodstudio platform=linux64 \
   url=file:///home/{user name}/work_ayastorm/3p-fmodstudio/fmodstudio-2.03.07-linux64-*.tar.bz2
 ```
 
-### 7. configure (first run or after --clean)
+### 7. Workaround for Modern Compilers (GCC 14+)
+
+```bash
+export CXXFLAGS="$CXXFLAGS -Wno-sfinae-incomplete"
+export CFLAGS="$CFLAGS -Wno-sfinae-incomplete"
+```
+
+### 8. Configure (first run or after --clean)
 
 ```bash
 cd ~/work_ayastorm/phoenix-firestorm
 autobuild configure -A 64 -c ReleaseFS_open --   --fmodstudio -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
 ```
 
-### 8. Build
+### 9. Build
 
 ```bash
 autobuild build -A 64 -c ReleaseFS_open --no-configure
 ```
 
-### 9. Clear Cache and Install
+### 10. Clear cache and Install
 
 ```bash
-cd ~/work_ayastorm/phoenix-firestorm
-autobuild configure -A 64 -c ReleaseFS_open --   --fmodstudio -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
-autobuild build -A 64 -c ReleaseFS_open
-
 cd ~/work_ayastorm/phoenix-firestorm/build-linux-x86_64/newview/packaged
 rm -rf ~/ayastorm/
 rm -rf ~/.local/share/applications/ayastorm-viewer.desktop
@@ -104,7 +116,7 @@ rm -rf ~/.local/share/applications/ayastorm-viewer.desktop
 rm -rf ~/.ayastorm_x64/cache/
 ```
 
-### 10. Run
+### 11. Run
 
 ```bash
 ~/ayastorm/ayastorm
@@ -149,21 +161,21 @@ rm -rf ~/.ayastorm_x64/cache/
 ### 2. Clone Repositories
 
 ```cmd
-c:
+cd C:
 mkdir work_ayastorm
 cd work_ayastorm
-git clone https://github.com/mayatonton/phoenix-firestorm.git
+git clone https://github.com/zhutra/phoenix-firestorm.git
 cd phoenix-firestorm
 git checkout ayastorm-release
 
-cd c:\work_ayastorm
+cd C:\work_ayastorm
 git clone https://github.com/FirestormViewer/fs-build-variables.git
 ```
 
 ### 3. Set Up autobuild (one-time)
 
 ```cmd
-cd c:\work_ayastorm\phoenix-firestorm
+cd C:\work_ayastorm\phoenix-firestorm
 pip install -r requirements.txt
 ```
 
@@ -174,7 +186,7 @@ Run in **Administrator cmd** before each build:
 ```cmd
 set PYTHONUTF8=1
 set AUTOBUILD_VSVER=170
-set AUTOBUILD_VARIABLES_FILE=c:\work_ayastorm\fs-build-variables\variables
+set AUTOBUILD_VARIABLES_FILE=C:\work_ayastorm\fs-build-variables\variables
 set PATH=C:\cygwin64\bin;%PATH%
 set AUTOBUILD_CONFIG_FILE=my_autobuild.xml
 ```
@@ -186,11 +198,11 @@ set AUTOBUILD_CONFIG_FILE=my_autobuild.xml
 Create a free account at https://www.fmod.com and download the Windows **FMOD Studio API** (version 2.03.07).
 
 ```cmd
-cd c:\work_ayastorm
+cd C:\work_ayastorm
 :: AYAstorm uses a fork that stages libopus bundled with the SDK (for Opus 5.1 surround support)
 git clone https://github.com/mayatonton/3p-fmodstudio.git
 copy fmodstudioapi20307win-installer.exe c:\work_ayastorm\3p-fmodstudio\
-cd c:\work_ayastorm\3p-fmodstudio
+cd C:\work_ayastorm\3p-fmodstudio
 autobuild build -A 64 --all
 autobuild package -A 64 --results-file result.txt
 type result.txt
@@ -199,20 +211,20 @@ type result.txt
 Register the md5 from result.txt with Firestorm:
 
 ```cmd
-cd c:\work_ayastorm\phoenix-firestorm
+cd C:\work_ayastorm\phoenix-firestorm
 copy autobuild.xml my_autobuild.xml
 set AUTOBUILD_CONFIG_FILE=my_autobuild.xml
 autobuild installables edit fmodstudio platform=windows64 ^
   hash=<md5-value> ^
-  url=file:///c:/work_ayastorm/3p-fmodstudio/fmodstudio-2.03.07-windows64-*.tar.bz2
+  url=file:///C:/work_ayastorm/3p-fmodstudio/fmodstudio-2.03.07-windows64-*.tar.bz2
 ```
 
-### 6. configure (Legacy)
+### 6. Configure (Legacy)
 
 After setting environment variables in Administrator cmd:
 
 ```cmd
-cd c:\work_ayastorm\phoenix-firestorm
+cd C:\work_ayastorm\phoenix-firestorm
 rmdir /s /q build-vc170-64
 autobuild configure -A 64 -c ReleaseFS_open -- --fmodstudio -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
 ```
@@ -226,16 +238,16 @@ autobuild build -A 64 -c ReleaseFS_open --no-configure
 ### 8. Installer Location (Legacy)
 
 ```
-c:\work_ayastorm\phoenix-firestorm\build-vc170-64\newview\Release\
+C:\work_ayastorm\phoenix-firestorm\build-vc170-64\newview\Release\
 Phoenix-FirestormOS-Ayastorm-release_LEGACY-7-2-4-80621_Setup.exe
 ```
 
-### 9. configure (AVX2)
+### 9. Configure (AVX2)
 
 After setting environment variables in Administrator cmd:
 
 ```cmd
-cd c:\work_ayastorm\phoenix-firestorm
+cd C:\work_ayastorm\phoenix-firestorm
 rmdir /s /q build-vc170-64
 autobuild configure -A 64 -c ReleaseFS_open -- --fmodstudio --avx2 -DLL_TESTS:BOOL=FALSE --package --chan AYAstorm-release
 ```
@@ -249,6 +261,6 @@ autobuild build -A 64 -c ReleaseFS_AVX2 --no-configure
 ### 11. Installer Location (AVX2)
 
 ```
-c:\work_ayastorm\phoenix-firestorm\build-vc170-64\newview\Release\
+C:\work_ayastorm\phoenix-firestorm\build-vc170-64\newview\Release\
 Phoenix-FirestormOS-AYAstorm-release_AVX2-7-2-4-80621_Setup.exe
 ```
