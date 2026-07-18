@@ -89,8 +89,8 @@ autobuild installables edit fmodstudio platform=linux64 \
 ### 7. Workaround for Modern Compilers (GCC 14+)
 
 ```bash
-export CXXFLAGS="$CXXFLAGS -Wno-sfinae-incomplete -Wno-error=maybe-uninitialized"
-export CFLAGS="$CFLAGS -Wno-sfinae-incomplete -Wno-error=maybe-uninitialized"
+export CXXFLAGS="$CXXFLAGS -Wno-sfinae-incomplete -Wno-error=maybe-uninitialized -Wno-error=array-bounds"
+export CFLAGS="$CFLAGS -Wno-sfinae-incomplete -Wno-error=maybe-uninitialized -Wno-error=array-bounds"
 ```
 
 ### 8. Configure (first run or after --clean)
