@@ -6,7 +6,7 @@
 
 **This fork** introduces extra lighting controls to help achieve a **neutral** look reminiscent of pre-PBR Second Life, while avoiding the constant _crashes_ of old viewer builds.
 
-[![Download](https://badgen.net/badge/icon/v7.2.4-ayastorm-r31-bugfix-2?icon=windows&label&color=157cca)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![Download](https://badgen.net/badge/icon/coming%20soon?icon=linux&label&color=f4bc00)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![Download](https://badgen.net/badge/icon/coming%20soon?icon=apple&label&color=a2aaad)](https://github.com/zhutra/phoenix-firestorm/releases/latest)
+[![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](https://github.com/zhutra/phoenix-firestorm/releases/latest) [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=F0F0F0)](https://github.com/zhutra/phoenix-firestorm/releases/latest)
 
 ## Features
 
