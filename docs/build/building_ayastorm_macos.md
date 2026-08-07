@@ -36,7 +36,7 @@ export AYA_BUILD_ID="80834"
 mkdir -p "$WORK"
 cd "$WORK"
 
-git clone https://github.com/mayatonton/phoenix-firestorm.git "$REPO"
+git clone https://github.com/zhutra/phoenix-firestorm.git "$REPO"
 git clone https://github.com/FirestormViewer/fs-build-variables.git "$WORK/fs-build-variables"
 
 cd "$REPO"
