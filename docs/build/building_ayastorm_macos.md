@@ -1,23 +1,23 @@
-# AYAstorm Mac版ビルド手順
+# AYAstorm macOS Build Instructions
 
 Date: 2026-05-06
 Target example: `feature/macos-arm64-build-on-latest` (based on `ayastorm-release`)
 Output example: `Phoenix-FirestormOS-AYAstorm-release_arm64-7-2-4-80834.dmg`
 
-この文書は AYAstorm の macOS arm64 配布用 DMG を作成するための手順です。Firestorm 本体の一般的な macOS ビルド要件は `doc/building_macos.md` も参照してください。
+This document describes the procedure for creating a macOS arm64 distribution DMG for AYAstorm. For general macOS build requirements for the Firestorm viewer itself, also refer to `doc/building_macos.md`.
 
-## 前提
+## Prerequisites
 
 - macOS 15.x
 - Xcode 16.x
 - CMake
-- Python 3.9 互換の venv
+- Python 3.9 compatible venv
 - `autobuild`
 - `fs-build-variables`
 - FMOD Studio API installer for macOS
-- FMOD を有効化する場合は、FMOD package を登録した `my_autobuild.xml`
+- If enabling FMOD, `my_autobuild.xml` with registered FMOD package
 
-作業ディレクトリ例:
+Work directory example:
 
 ```bash
 export WORK="$HOME/work_ayastorm"
@@ -28,9 +28,9 @@ export TARGET_REF="feature/macos-arm64-build-on-latest"
 export AYA_BUILD_ID="80834"
 ```
 
-`AYA_BUILD_ID` は Release ページの成果物名に含める autobuild build id です。Release 配布物では、git commit count ではなく CI / autobuild 側の build id を明示して揃えます。
+`AYA_BUILD_ID` is the autobuild build id to be included in the artifact name on the Release page. For release distributions, the build id from CI / autobuild is explicitly specified and aligned, rather than the git commit count.
 
-## ソース取得
+## Source Acquisition
 
 ```bash
 mkdir -p "$WORK"
@@ -44,7 +44,7 @@ git checkout "$TARGET_REF"
 git status --short
 ```
 
-既存 worktree を使う場合は `REPO` にその path を指定し、ビルド前に `git status --short` で差分を確認します。不要な差分を含めたまま Release ビルドしないようにしてください。
+If using an existing worktree, specify its path as `REPO` and verify differences with `git status --short` before building. Do not perform a Release build while including unnecessary diffs.
 
 ## Python / autobuild
 
@@ -57,7 +57,7 @@ pip install -r requirements.txt
 autobuild --version
 ```
 
-`xcodebuild` から起動される Python が venv の package を参照できるよう、site-packages を `PYTHONPATH` に渡します。
+To allow Python launched from `xcodebuild` to reference venv packages, pass site-packages to `PYTHONPATH`.
 
 ```bash
 export PYTHON_SITE="$(python -c 'import site; print(site.getsitepackages()[0])')"
@@ -66,11 +66,11 @@ export PYTHONPATH="$PYTHON_SITE"
 
 ## FMOD Studio API
 
-AYAstorm の Release ビルドでは `--fmodstudio` を付けて configure します。そのため、事前に FMOD Studio API を autobuild package 化し、`my_autobuild.xml` に登録しておく必要があります。
+For AYAstorm Release builds, configure with the `--fmodstudio` flag. Therefore, pre-package FMOD Studio API with autobuild and register it in `my_autobuild.xml`.
 
-FMOD Studio API は FMOD 公式サイトから macOS 版を取得します。FMOD Studio Tool ではなく、FMOD Studio API installer を使ってください。
+Obtain the FMOD Studio API for macOS from the official FMOD website. Use the FMOD Studio API installer, not the FMOD Studio Tool.
 
-この作業環境では FMOD package 作成に既存の local clone を使います。
+In this work environment, use an existing local clone for FMOD package creation.
 
 ```bash
 export FMOD_REPO="$WORK/3p-fmodstudio"
@@ -78,7 +78,7 @@ test -d "$FMOD_REPO/.git"
 git -C "$FMOD_REPO" remote -v
 ```
 
-ダウンロードした macOS 版 FMOD Studio API installer の `.dmg` を `$FMOD_REPO` に置きます。
+Place the downloaded macOS FMOD Studio API installer `.dmg` in `$FMOD_REPO`.
 
 ```bash
 cd "$FMOD_REPO"
@@ -89,7 +89,7 @@ autobuild package -A 64 --results-file result.txt
 cat result.txt
 ```
 
-`result.txt` に package path と md5 hash が出力されます。作成された `fmodstudio-*-darwin64-*.tar.bz2` を viewer 側の `my_autobuild.xml` に登録します。
+The package path and md5 hash are output to `result.txt`. Register the created `fmodstudio-*-darwin64-*.tar.bz2` in the viewer side `my_autobuild.xml`.
 
 ```bash
 cd "$REPO"
@@ -97,40 +97,40 @@ cp -n autobuild.xml my_autobuild.xml
 export AUTOBUILD_CONFIG_FILE="my_autobuild.xml"
 
 export FMOD_PACKAGE="$(find "$FMOD_REPO" -maxdepth 1 -name 'fmodstudio-*-darwin64-*.tar.bz2' -print -quit)"
-export FMOD_HASH="<result.txt の md5 hash>"
+export FMOD_HASH="<md5 hash from result.txt>"
 
 autobuild installables edit fmodstudio platform=darwin64 \
   hash="$FMOD_HASH" \
   url="file://$FMOD_PACKAGE"
 ```
 
-登録後、`my_autobuild.xml` の `fmodstudio` / `darwin64` が作成した package を指していることを確認します。
+After registration, verify that `fmodstudio` / `darwin64` in `my_autobuild.xml` points to the created package.
 
 ```bash
 rg -n 'fmodstudio|darwin64|file://' my_autobuild.xml
 ```
 
-FMOD を使わないビルドにする場合は、以降の configure から `--fmodstudio` を外してください。
+If building without FMOD, remove `--fmodstudio` from the configure step onward.
 
-## Dullahan audio callback
+## Dullahan Audio Callback
 
-AYAstorm Mac ビルド手順のデフォルトは Dullahan audio callback 経路を有効にします。
+The default AYAstorm Mac build procedure enables the Dullahan audio callback path.
 
-`autobuild.xml` または `my_autobuild.xml` に `t-noami/dullahan` fork の installable (`dullahan_aya_audio`) が存在している場合:
+If the `t-noami/dullahan` fork's installable (`dullahan_aya_audio`) exists in `autobuild.xml` or `my_autobuild.xml`:
 
 ```bash
 -DLL_DULLAHAN_AUDIO_CALLBACK:BOOL=TRUE
 ```
 
-`t-noami/dullahan` fork が存在しておらず、upstream の `secondlife/dullahan` installable (`dullahan`) が存在している場合:
+If the `t-noami/dullahan` fork does not exist and the upstream `secondlife/dullahan` installable (`dullahan`) exists:
 
 ```bash
 -DLL_DULLAHAN_AUDIO_CALLBACK:BOOL=FALSE
 ```
 
-configure 後は `build-darwin-universal/CMakeCache.txt` で `LL_DULLAHAN_AUDIO_CALLBACK:BOOL=` の値を確認してください。
+After configure, verify the `LL_DULLAHAN_AUDIO_CALLBACK:BOOL=` value in `build-darwin-universal/CMakeCache.txt`.
 
-## 環境変数
+## Environment Variables
 
 ```bash
 cd "$REPO"
@@ -144,14 +144,14 @@ export CLANG_MODULE_CACHE_PATH="$REPO/build-darwin-universal/ModuleCache"
 
 ## Configure
 
-クリーンに作り直す場合:
+To build clean:
 
 ```bash
 cd "$REPO"
 rm -rf build-darwin-universal
 ```
 
-configure:
+Configure:
 
 ```bash
 autobuild configure -A 64 -c ReleaseFS_open -- \
@@ -163,14 +163,14 @@ autobuild configure -A 64 -c ReleaseFS_open -- \
   -DLL_DULLAHAN_AUDIO_CALLBACK:BOOL=TRUE
 ```
 
-configure 後に主要な設定を確認します。
+After configure, verify major settings.
 
 ```bash
 rg -n 'CMAKE_BUILD_TYPE|ADDRESS_SIZE|CMAKE_OSX_ARCHITECTURES|VIEWER_CHANNEL|USE_FMODSTUDIO|USE_OPENAL|OPENSIM|PACKAGE|VIEWER_BINARY_NAME|LL_DULLAHAN_AUDIO_CALLBACK' \
   build-darwin-universal/CMakeCache.txt
 ```
 
-期待値の例:
+Expected values example:
 
 ```text
 ADDRESS_SIZE:STRING=64
@@ -187,7 +187,7 @@ LL_DULLAHAN_AUDIO_CALLBACK:BOOL=TRUE
 
 ## Build / Package
 
-`llpackage` scheme を Release で実行します。
+Execute the `llpackage` scheme in Release configuration.
 
 ```bash
 cd "$REPO/build-darwin-universal"
@@ -207,9 +207,9 @@ xcodebuild \
   build
 ```
 
-DMG 作成時に `hdiutil create` が `装置が構成されていません` で失敗する場合は、サンドボックスや権限の制約でディスクイメージ操作が止まっています。同じコマンドを通常の Terminal から実行してください。
+If `hdiutil create` fails during DMG creation with "device not configured", sandbox or permission restrictions are blocking disk image operations.
 
-## 成果物
+## Artifacts
 
 ```bash
 export DMG="$REPO/build-darwin-universal/newview/Phoenix-FirestormOS-AYAstorm-release_arm64-7-2-4-${AYA_BUILD_ID}.dmg"
@@ -218,15 +218,15 @@ export APP="$REPO/build-darwin-universal/newview/Release/AYAstorm.app"
 ls -lh "$DMG"
 ```
 
-成果物の例:
+Artifact example:
 
 ```text
 build-darwin-universal/newview/Phoenix-FirestormOS-AYAstorm-release_arm64-7-2-4-80834.dmg
 ```
 
-## 検証
+## Verification
 
-ローカル app / DMG の基本検証:
+Basic verification of local app / DMG:
 
 ```bash
 hdiutil verify "$DMG"
@@ -237,7 +237,7 @@ lipo -archs "$APP/Contents/MacOS/AYAstorm"
 /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist"
 ```
 
-期待値:
+Expected values:
 
 ```text
 hdiutil verify: VALID
@@ -248,7 +248,7 @@ CFBundleVersion: 7.2.4.80834
 CFBundleShortVersionString: 7.2.4.80834
 ```
 
-ログイン情報やローカル環境情報が混入していないか確認します。いずれも出力なしであることを確認してください。
+Verify that login information or local environment information is not mixed in. Confirm that both produce no output.
 
 ```bash
 export LOCAL_USER="$(id -un)"
@@ -263,13 +263,13 @@ find "$APP" \
   -o -iname '*saved_password*'
 ```
 
-DMG 内の app も確認します。
+Also verify the app inside the DMG.
 
 ```bash
 hdiutil attach -nobrowse -readonly "$DMG"
 ```
 
-`hdiutil attach` の出力から device と mount point を確認し、以下の `diskX` を置き換えます。
+From the `hdiutil attach` output, identify the device and mount point, and replace the following `diskX`.
 
 ```bash
 export DMG_MOUNT="/Volumes/AYAstorm Installer"
@@ -290,22 +290,22 @@ md5 "$DMG_MOUNT/.VolumeIcon.icns" \
 hdiutil detach -force /dev/diskX
 ```
 
-## 署名とローカルパス対策
+## Code Signing and Local Path Mitigation
 
-`Code Signature Invalid` やローカルビルドパス混入を避けるため、Release package では Mach-O のローカルシンボルを落としてから再署名します。
+To avoid `Code Signature Invalid` and local build path contamination, strip local symbols from Mach-O in Release packages before re-signing.
 
 - `indra/cmake/00-Common.cmake`
-  - Darwin / Clang で `-ffile-prefix-map`, `-fmacro-prefix-map`, `-fdebug-prefix-map` を指定
+  - Specifies `-ffile-prefix-map`, `-fmacro-prefix-map`, `-fdebug-prefix-map` for Darwin / Clang
 - `indra/newview/viewer_manifest.py`
-  - package 時に bundle 内 Mach-O へ `strip -S -x` を実行
-  - その後に nested app / dylib を再署名
+  - Executes `strip -S -x` on Mach-O within bundle during packaging
+  - Re-signs nested apps / dylibs afterward
 
-`strip` の途中で code signature が無効になる警告が出ることがありますが、その直後に再署名するため想定内です。配布前には必ず `codesign --verify --deep --strict` を通してください。
+A code signature invalid warning may appear during the strip process, but this is expected as re-signing occurs immediately after. Always execute `codesign --verify --deep --strict` before distribution.
 
-## 注意
+## Notes
 
-- DMG ファイル名は Release 向けに `arm64` を含めます。
-- アプリ名は `AYAstorm.app` のままです。
-- DMG 内の app 名は `FirestormOS-AYAstorm-release.app` です。
-- 配布前に notarization を行う場合は、Developer ID と notary 設定を別途確認します。
-- 生成済み app を手作業で編集した場合は、必ず再署名と `codesign --verify --deep --strict` を実行します。
+- DMG filename should include `arm64` for Release distribution.
+- App name remains `AYAstorm.app`.
+- App name inside DMG is `FirestormOS-AYAstorm-release.app`.
+- If performing notarization before distribution, separately verify Developer ID and notary settings.
+- If an existing app is manually edited, always execute re-signing and `codesign --verify --deep --strict`.
