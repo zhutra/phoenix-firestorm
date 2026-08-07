@@ -1,7 +1,7 @@
 # AYAstorm macOS Build Instructions (x86_64)
 
-Date: 2026-05-06
-Target example: `feature/macos-x86_64-build-monterey` (based on `ayastorm-release`)
+Date: 2026-05-06 \
+Target example: `feature/macos-x86_64-build` (based on `ayastorm-release`) \
 Output example: `Phoenix-FirestormOS-AYAstorm-release_x86_64-7-2-4-80834.dmg`
 
 This document describes the procedure for creating a macOS x86_64 distribution DMG for AYAstorm on Monterey. For general macOS build requirements for the Firestorm viewer itself, also refer to `doc/building_macos.[...]
