@@ -4,9 +4,6 @@
 
 This guide is tailored for users with older Intel Macs that cannot upgrade to newer macOS versions. This document adapts the Firestorm build process for compatibility with Monterey and includes detailed explanations for complete beginners.
 
-> [!WARNING]
-> We do not provide support for compiling the viewer on your own. However, there is a self-compilers group in Second Life that can be joined to ask questions related to compiling the viewer: [Firestorm Self Compilers](https://tinyurl.com/firestorm-self-compilers)
-
 ## System Requirements
 
 - **macOS**: 10.13 (High Sierra) or later — Monterey (12.x) is ideal for this guide
@@ -366,101 +363,6 @@ In Terminal:
 ```bash
 open ~/firestorm/phoenix-firestorm/build-darwin-x86_64/newview/Release
 ```
-
-This opens a Finder window showing your compiled Firestorm.
-
-### Step 2: Run Firestorm
-
-You should see a file or app called **Firestorm** (or similar name). Double-click it to run!
-
-### Step 3: (Optional) Copy to Applications
-
-To make it easier to find later, you can copy the Firestorm app to your Applications folder:
-
-1. In Finder, drag the Firestorm app into the Applications folder
-2. Now you can find it in Applications or Launchpad
-
-### Step 4: First Launch
-
-When Firestorm runs for the first time:
-- It will ask you to accept the license
-- It will set up default settings
-- Be patient — first launch is slower than subsequent ones
-
-**Congratulations! You've successfully built Firestorm!**
-
----
-
-## Troubleshooting
-
-### "Command not found: autobuild"
-
-**Problem**: Terminal doesn't recognize autobuild command.
-
-**Solution**: 
-1. Close Terminal completely
-2. Open a new Terminal window
-3. Type `autobuild --version` again
-
-If it still doesn't work:
-```bash
-export PATH=$PATH:~/Library/Python/3.7/bin/
-```
-
-Then try `autobuild --version` again.
-
-### "Xcode version is too new"
-
-**Problem**: `clang --version` shows version 12 or higher.
-
-**Solution**: 
-1. You installed the wrong Xcode version
-2. Delete Xcode.app from Applications
-3. Download and install Xcode 11.7 from Apple's developer website (see Part 2)
-
-### Build fails with "file not found" or compilation errors
-
-**Problem**: Build stops with file not found or compiler errors.
-
-**Solution**:
-1. Clean the build directory:
-   ```bash
-   cd ~/firestorm/phoenix-firestorm
-   rm -rf build-darwin-x86_64
-   ```
-
-2. Reconfigure from scratch:
-   ```bash
-   autobuild configure -A 64 -c ReleaseFS_open
-   ```
-
-3. Try building again:
-   ```bash
-   autobuild build -A 64 -c ReleaseFS_open --no-configure
-   ```
-
-### "CMake not found" or CMake version too old
-
-**Problem**: CMake version is less than 3.16.0.
-
-**Solution**:
-1. Download a newer CMake version from [cmake.org/download](https://cmake.org/download)
-2. Install it following Part 3
-3. Re-run the CMake install command:
-   ```bash
-   sudo /Applications/CMake.app/Contents/MacOS/CMake --install
-   ```
-
-### Build takes hours or seems stuck
-
-**Problem**: Build has been running for 4+ hours or appears frozen.
-
-**Solution**:
-1. Check your Mac's activity — look for compiler processes running
-2. Press `Ctrl + C` in Terminal to cancel if it's truly stuck
-3. Clean and try again (see "Build fails" section above)
-4. Make sure you have at least 30GB free disk space
-
 ---
 
 ## Updating Your Build
@@ -485,21 +387,3 @@ git pull
 autobuild configure -A 64 -c ReleaseFS_open
 autobuild build -A 64 -c ReleaseFS_open --no-configure
 ```
-
----
-
-## Additional Resources
-
-- **Firestorm Website**: [firestormviewer.org](https://www.firestormviewer.org)
-- **Firestorm Self Compilers Group**: [tinyurl.com/firestorm-self-compilers](https://tinyurl.com/firestorm-self-compilers)
-- **Firestorm GitHub**: [github.com/FirestormViewer/phoenix-firestorm](https://github.com/FirestormViewer/phoenix-firestorm)
-- **Autobuild Documentation**: [github.com/secondlife/autobuild](https://github.com/secondlife/autobuild)
-
----
-
-## Notes
-
-- This guide is for **Intel Macs only**. Apple Silicon (M1/M2/M3) Macs need different instructions.
-- Some build dependencies might take a while on first build — subsequent builds are much faster.
-- Building uses significant CPU power — your Mac may run hot and fan loudly during compilation.
-- Building consumes 30-40GB of disk space temporarily. You can delete the build directory after if needed, but you'll need to rebuild to get new updates.
