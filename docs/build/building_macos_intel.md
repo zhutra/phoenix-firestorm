@@ -1,4 +1,4 @@
-# Build Instructions for macOS Intel (Monterey & Legacy Macs)
+# Build Instructions for macOS Intel
 
 **For Intel-based Macs running macOS Monterey 12.x or older**
 
