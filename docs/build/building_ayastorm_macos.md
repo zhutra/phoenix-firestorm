@@ -1,7 +1,7 @@
 # AYAstorm macOS Build Instructions
 
-Date: 2026-05-06
-Target example: `feature/macos-arm64-build-on-latest` (based on `ayastorm-release`)
+Date: 2026-05-06 \
+Target example: `feature/macos-arm64-build-on-latest` (based on `ayastorm-release`) \
 Output example: `Phoenix-FirestormOS-AYAstorm-release_arm64-7-2-4-80834.dmg`
 
 This document describes the procedure for creating a macOS arm64 distribution DMG for AYAstorm. For general macOS build requirements for the Firestorm viewer itself, also refer to `doc/building_macos.md`.
