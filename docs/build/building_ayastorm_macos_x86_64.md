@@ -8,13 +8,14 @@ This document describes the procedure for creating a macOS x86_64 distribution D
 
 ## Prerequisites
 
-- macOS 12.x (Monterey)
+- macOS 12.x
 - Xcode 13.x or 14.x
 - CMake
+- [ripgrep](https://ports.macports.org/port/ripgrep/)
 - Python 3.9 compatible venv
 - `autobuild`
 - `fs-build-variables`
-- FMOD Studio API installer for macOS
+- FMOD Studio API 2.03.07 installer for macOS
 - If enabling FMOD, `my_autobuild.xml` with registered FMOD package
 
 Work directory example:
@@ -74,7 +75,9 @@ In this work environment, use an existing local clone for FMOD package creation.
 
 ```bash
 export FMOD_REPO="$WORK/3p-fmodstudio"
-test -d "$FMOD_REPO/.git"
+
+cd "$WORK"
+git clone https://github.com/mayatonton/3p-fmodstudio.git "$FMOD_REPO"
 git -C "$FMOD_REPO" remote -v
 ```
 
