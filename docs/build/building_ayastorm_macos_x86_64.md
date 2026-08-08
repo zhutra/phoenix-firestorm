@@ -24,7 +24,7 @@ export WORK="$HOME/work_ayastorm"
 export REPO="$WORK/phoenix-firestorm"
 export FS_BUILD_VARIABLES="$WORK/fs-build-variables/variables"
 export FMOD_REPO="$WORK/3p-fmodstudio"
-export TARGET_REF="feature/macos-x86_64-build-monterey"
+export TARGET_REF="feature/macos-x86_64-build"
 export AYA_BUILD_ID="80834"
 ```
 
